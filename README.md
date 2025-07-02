@@ -36,23 +36,6 @@ SREINet employs an interpretable neural network architecture that combines:
 
 ![Figure 1](figs/Figure%209.png)
 
-The neural network architecture consists of an input layer, multiple hidden layers, and an output layer. The input is the state variables $\boldsymbol{x}=[x_1(t),x_2(t),\dots,x_n(t)]^T$, and the output is the time derivative $\dot{x}_i$ for each dimension.
-
-**Activation Functions**: Each layer uses univariate candidate functions:
-$$\boldsymbol{\Phi}^{[j]} = \left[\varphi_1^{[j]},\varphi_2^{[j]},\dots,\varphi_{k}^{[j]}\right]^T$$
-
-where $\varphi^{[j]}_i(\zeta) \in \{1,\zeta, \sin(\zeta), \sin(2\zeta),\dots, \cos(\zeta), \cos(2\zeta),\dots\}$
-
-**Hidden Layer Output**: The $j$th hidden layer output is:
-$$\boldsymbol{y}^{[j]}=\boldsymbol{\Phi}^{[j]}(\boldsymbol{x}) \odot \boldsymbol{W}^{[j-1]} \boldsymbol{\cdot} \boldsymbol{y}^{[j-1]}$$
-
-where $\odot$ denotes elementwise Hadamard product and $\boldsymbol{\cdot}$ is matrix multiplication.
-
-**Network Output**: The final output is:
-$$\hat{\dot{x}}_i=\mathcal{N}(\boldsymbol{x})=\boldsymbol{1}_{1\times k} \boldsymbol{\cdot} \boldsymbol{\Phi}^{[p]}(\boldsymbol{x}) \odot \boldsymbol{W}^{[p-1]} \cdots \boldsymbol{W}^{[2]} \boldsymbol{\cdot} \boldsymbol{\Phi}^{[2]}(\boldsymbol{x}) \odot \boldsymbol{W}^{[1]} \boldsymbol{\cdot} \boldsymbol{\Phi}^{[1]}(\boldsymbol{x})$$
-
-where $p$ is the network depth (highest order of nonlinearity) and $\boldsymbol{1}_{1\times k}$ represents fixed unit weights of the output layer.
-
 **Key Features**:
 - No composition of activation functions
 - Explicit form can be written as sum of all combinations up to $p$th order
