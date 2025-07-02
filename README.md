@@ -156,16 +156,19 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - **Efstathios G. Charalampidis**, San Diego State University
 - **Ying-Cheng Lai**, Arizona State University
 
+<!---
 ## 📚 Citation
 
 If you use this code in your research, please cite:
+
 
 ```bibtex
 @article{sreinet2025,
   title={Data-driven discovery of spatiotemporal dynamical systems with sparse interpretable neural networks},
   author={Xing, Siyuan and Han, Qingyu and Charalampidis, Efstathios G. and Lai, Ying-Cheng},
-  journal={Nature Communications},
+  journal={Arxiv},
   year={2025},
   doi={TBD}
 }
 ```
+-->
