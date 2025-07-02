@@ -41,7 +41,7 @@ The neural network architecture consists of an input layer, multiple hidden laye
 **Activation Functions**: Each layer uses univariate candidate functions:
 $$\boldsymbol{\Phi}^{[j]} = \left[\varphi_1^{[j]},\varphi_2^{[j]},\dots,\varphi_{k}^{[j]}\right]^T$$
 
-where $\varphi^{[j]}_i(\zeta) \in \left\{1,\zeta, \sin(\zeta), \sin(2\zeta),\dots, \cos(\zeta), \cos(2\zeta),\dots\right\}$
+where $\varphi^{[j]}_i(\zeta) \in \{1,\zeta, \sin(\zeta), \sin(2\zeta),\dots, \cos(\zeta), \cos(2\zeta),\dots\}$
 
 **Hidden Layer Output**: The $j$th hidden layer output is:
 $$\boldsymbol{y}^{[j]}=\boldsymbol{\Phi}^{[j]}(\boldsymbol{x}) \odot \boldsymbol{W}^{[j-1]} \boldsymbol{\cdot} \boldsymbol{y}^{[j-1]}$$
