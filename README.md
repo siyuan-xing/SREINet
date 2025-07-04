@@ -54,46 +54,48 @@ SREINet employs an interpretable neural network architecture that combines:
 
 ### Setup
 
-1. **Clone the repository**:
+#### Using Conda 
+
+1. **Create and activate conda environment**:
+   ```bash
+   conda create -n sreinet python=3.10.13
+   conda activate sreinet
+   ```
+
+2. **Clone the repository**:
    ```bash
    git clone https://github.com/siyuan-xing/SREINet.git
    cd SREINet
    ```
 
-2. **Install dependencies**:
+3. **Install dependencies**:
    ```bash
    pip install -r requirements.txt
    ```
 
-3. **Verify installation**:
+4. **Verify installation**:
    ```python
    import tensorflow as tf
    print(f"TensorFlow version: {tf.__version__}")
    # Should output: TensorFlow version: 2.10.0
    ```
 
+
 ### Required Packages
 
 The following packages are automatically installed via `requirements.txt`:
 
 - **tensorflow==2.10.0** - Deep learning framework (specific version required)
-- **numpy>=1.19.0** - Numerical computing
-- **matplotlib>=3.3.0** - Plotting and visualization
+- **numpy>=1.19.0<1.24.0** - Numerical computing
+- **matplotlib>=3.5.0** - Plotting and visualization
 - **scipy>=1.7.0** - Scientific computing
 - **pandas>=1.3.0** - Data manipulation
 - **scikit-learn>=1.0.0** - Machine learning utilities
 - **openpyxl>=3.0.0** - Excel file handling
-- **packaging>=20.0** - Version comparison utilities
+- **packaging>=21.0** - Version comparison utilities
+- **seaborn>=0.11.0** -  Data visualization
+- **ipykernel>=6.0.0** - Jupyter kernel for Python 
 
-### Manual Installation (if needed)
-
-If you prefer to install packages manually:
-
-```bash
-pip install tensorflow==2.10.0
-pip install numpy matplotlib scipy pandas scikit-learn
-pip install openpyxl packaging
-```
 
 ## 📚 Usage
 
