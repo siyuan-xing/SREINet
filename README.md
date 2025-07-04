@@ -1,7 +1,7 @@
 # Data-driven discovery of spatiotemporal dynamical systems with sparse interpretable neural networks
 
 [![Python 3.10.13](https://img.shields.io/badge/python-3.10.13-blue.svg)](https://www.python.org/downloads/)
-[![TensorFlow 2.10](https://img.shields.io/badge/tensorflow-2.10.0-orange.svg)](https://tensorflow.org/)
+[![TensorFlow 2.10-2.15](https://img.shields.io/badge/tensorflow-2.10--2.15-orange.svg)](https://tensorflow.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ## 📖 Overview
@@ -50,7 +50,7 @@ SREINet employs an interpretable neural network architecture that combines:
 ### Prerequisites
 
 - Python 3.10.13
-- TensorFlow 2.10.0 (specific version required)
+- TensorFlow 2.10.0 to 2.15.0 (inclusive)
 
 ### Setup
 
@@ -77,7 +77,7 @@ SREINet employs an interpretable neural network architecture that combines:
    ```python
    import tensorflow as tf
    print(f"TensorFlow version: {tf.__version__}")
-   # Should output: TensorFlow version: 2.10.0
+   # Should output: TensorFlow version between 2.10.0 and 2.15.0
    ```
 
 
@@ -85,8 +85,8 @@ SREINet employs an interpretable neural network architecture that combines:
 
 The following packages are automatically installed via `requirements.txt`:
 
-- **tensorflow==2.10.0** - Deep learning framework (specific version required)
-- **numpy>=1.19.0<1.24.0** - Numerical computing
+- **tensorflow>=2.10.0,<=2.15.0** - Deep learning framework (tested versions)
+- **numpy>=1.19.0,<1.24.0** - Numerical computing
 - **matplotlib>=3.5.0** - Plotting and visualization
 - **scipy>=1.7.0** - Scientific computing
 - **pandas>=1.3.0** - Data manipulation
@@ -130,24 +130,33 @@ All examples are provided as Jupyter notebooks in the `examples/` directory.
 
 ```
 SREINet/
-├── utilities/                 # Core implementation
-│   ├── SREINet.py            # Main network implementation
-│   ├── DataGenerator.py      # Data generation utilities
-│   ├── Model_zoo.py          # Predefined dynamical systems
-│   ├── loss.py               # Loss functions
-│   └── pruning_schedule.py   # Pruning utilities
-├── examples/                  # Jupyter notebook examples
-│   ├── SREINet_Lorenz96.ipynb
-│   ├── SREINet_Kuramoto.ipynb
-│   ├── SREINet_Phi_4.ipynb
-│   └── ...
-├── results/                   # Training results and outputs
-│   ├── AL-128D/
-│   ├── DNLS-100D/
-│   ├── Kuramoto-60D/
-│   └── ...
-├── data/                      # Experimental data
-└── requirements.txt           # Python dependencies
+├── code/                      # Main code directory
+│   ├── utilities/             # Core implementation
+│   │   ├── SREINet.py        # Main network implementation
+│   │   ├── DataGenerator.py  # Data generation utilities
+│   │   ├── Model_zoo.py      # Predefined dynamical systems
+│   │   ├── loss.py           # Loss functions
+│   │   ├── pruning_schedule.py # Pruning utilities
+│   │   └── DataLogger.py     # Data logging utilities
+│   ├── examples/              # Jupyter notebook examples
+│   │   ├── SREINet_Lorenz96.ipynb
+│   │   ├── SREINet_Kuramoto.ipynb
+│   │   ├── SREINet_Phi_4.ipynb
+│   │   ├── SREINet_DNLS.ipynb
+│   │   ├── SREINet_AL.ipynb
+│   │   ├── SREINet_FPU.ipynb
+│   │   ├── SREINet_triple_pendulum.ipynb
+│   │   └── ...
+│   ├── experiment_data/       # Data download scripts
+│   └── results/               # Training results and outputs
+│       ├── AL-128D/
+│       ├── DNLS-100D/
+│       ├── Kuramoto-60D/
+│       └── ...
+├── data/                      # Source data for figures
+├── figs/                      # Generated figures
+├── requirements.txt           # Python dependencies
+└── README.md                  # This file
 ```
 
 ## 📄 License
