@@ -101,7 +101,7 @@ The following packages are automatically installed via `requirements.txt`:
 
 ### Data Download
 
-For the triple pendulum experimental data:
+For the triple pendulum experimental data (Credit: [MultiArm-Pendulum](https://github.com/dynamicslab/MultiArm-Pendulum)):
 
 ```bash
 cd code/experiment_data
@@ -109,6 +109,9 @@ python download_data.py
 ```
 
 This will download ~65MB of experimental data to `code/experiment_data/TriplePendulum_Data/`.
+
+**Data Source**: The experimental triple pendulum data is from the [MultiArm-Pendulum repository](https://github.com/dynamicslab/MultiArm-Pendulum) by Kaheman et al. (2022). 
+
 
 ### Running Examples
 
