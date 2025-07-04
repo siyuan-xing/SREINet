@@ -1,6 +1,6 @@
 # Data-driven discovery of spatiotemporal dynamical systems with sparse interpretable neural networks
 
-[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
+[![Python 3.10.13](https://img.shields.io/badge/python-3.10.13-blue.svg)](https://www.python.org/downloads/)
 [![TensorFlow 2.10](https://img.shields.io/badge/tensorflow-2.10.0-orange.svg)](https://tensorflow.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -49,7 +49,7 @@ SREINet employs an interpretable neural network architecture that combines:
 
 ### Prerequisites
 
-- Python 3.8 or higher
+- Python 3.10.13
 - TensorFlow 2.10.0 (specific version required)
 
 ### Setup

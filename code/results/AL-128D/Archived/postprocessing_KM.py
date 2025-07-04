@@ -20,38 +20,40 @@ MY_MODEL = 'abolowitz_ladik'
 node_num = 64
 n= np.arange(-node_num/2, node_num/2)
 
-sigma = 0.6
+t0 = -5.0
 
-x0 = np.exp(-n**2/2/sigma**2)+0j
+w = 4.0
+theta = -np.arcsinh(w)
+r= np.arccosh((2+np.cosh(theta))/3)
+G = - w/np.sqrt(3)/np.sinh(r)
+
+
+x0 = 1/np.sqrt(2)*(np.cos(w*t0+1j*theta)+G*np.cosh(r*n))/(np.cos(w*t0)+G*np.cosh(r*n))
 
 #plot the magnitude of x0
 
 plt.plot(np.abs(x0))
 plt.show()
 
-
-data_T =  500.0       # Length of the data (T)
+data_T = 10.0       # Length of the data (T)
 data_dt = 0.01       # Resolution of the data (dt)
+
+tf = data_T + t0
 myDG = DG.DataGenerator(x0,T=data_T, dt=data_dt)
 t_arr, x_train, dx_train, guess_highest_order_polynomial = myDG.generate_dataset_by_model_name(MY_MODEL, node_num, method='BDF')
 
+t_arr = t_arr + t0 #shift the time axis to the original time
 
-#train_data = scipy.io.loadmat('train_data.mat')
-#val_data = scipy.io.loadmat('validation_data.mat')
-
-#extract the data from the fourth sheet
-#train_data = train_data['data']
-#val_data = val_data['data']
-
-# data (validation)
 x_data = np.concatenate((np.real(x_train), np.imag(x_train)), axis=1)
 dx_data = np.concatenate((np.real(dx_train), np.imag(dx_train)), axis=1)
+
+
 
 sim_init = np.concatenate((np.real(x0), np.imag(x0)))
 
 # Define the time span for the simulation
-t_span = (0, data_T)
-t_eval = np.arange(0, data_T, data_dt)
+t_span = (t0, tf)
+t_eval = np.arange(t0, tf, data_dt)
 
 # Solve the ODE system
 solution = solve_ivp(AL_ode, t_span, sim_init, t_eval=t_eval,method='BDF')
@@ -60,8 +62,6 @@ sol = solution.y.T
 
 pred_amp = np.abs(sol[:,:node_num] + 1j*sol[:,node_num:])
 sim_amp = np.abs(x_train)
-
-
 
 params = {
     'image.origin': 'lower',
@@ -84,7 +84,6 @@ import matplotlib
 
 matplotlib.rcParams.update(params)
 
-
 pred_amp = pred_amp.T
 sim_amp = sim_amp.T
 print(pred_amp.shape)
@@ -92,114 +91,52 @@ print(sim_amp.shape)
 
 my_size = 110/25.4 #110mm
 
-fig = plt.figure(figsize=(my_size*2, my_size))
+fig = plt.figure(figsize=(my_size*2, my_size/2), facecolor='none')
 
-gs = fig.add_gridspec(10, 3, width_ratios=[20, 20, 1], hspace=0.1, wspace=0.2)
+gs = fig.add_gridspec(5, 3, width_ratios=[20, 20, 1], hspace=0.1, wspace=0.1)
 
 import matplotlib.colors as mcolors
 import cmocean
 
-ax1 = fig.add_subplot(gs[:4, 0])
-ax1.set_position([ax1.get_position().x0, ax1.get_position().y0 + 0.03, ax1.get_position().width, ax1.get_position().height])
-cax1 = ax1.imshow(sim_amp, aspect='auto', cmap='cmo.tempo', extent=[0, data_T, -node_num//2, node_num//2])
+ax5 = fig.add_subplot(gs[:4, 0])
+ax5.set_position([ax5.get_position().x0, ax5.get_position().y0 + 0.02, ax5.get_position().width, ax5.get_position().height])
 
-step = 400
-ax1.set_xticks([])
-#ax1.set_ylim(0,node_num)
-ax1.set_yticks([-32,-16,0,16,32])
-
-ax1.set_ylabel(r'State Index, $i$')
-x_mid = (plt.xlim()[0] + plt.xlim()[1]) / 2
-#ax1.axvline(x=x_mid, color='k', linestyle='--')
-ax1.set_title("Full Simulation")
-
-ax2 = fig.add_subplot(gs[4, 0])
-ax2.set_position([ax2.get_position().x0, ax2.get_position().y0 + 0.03, ax2.get_position().width, ax2.get_position().height])
-ax2.plot(t_arr, sim_amp[node_num//2-1,:],'k', linewidth=2.0)
-ax2.set_xlim(0,data_T)
-ax2.set_ylim(-0.2,1.0)
-ax2.set_xticks([0, 60, 120, 180])
-ax2.set_ylabel(r'${u}_{32}$')
-ax2.set_yticks([0, 0.5])
-#add a vertical dash line at the middle of x axis
-
-#reference_line = 60 
-#ax2.axvline(x=reference_line, color='k', linestyle='--')
-
-
-#### 3 and 4
-ax3 = fig.add_subplot(gs[:4, 1])
-ax3.set_position([ax3.get_position().x0, ax3.get_position().y0 + 0.03, ax3.get_position().width, ax3.get_position().height])
-cax3 = ax3.imshow(pred_amp, aspect='auto', extent=[0, data_T, -node_num//2, node_num//2], cmap='cmo.tempo')
-
-#ax1.set_xticks(ticks=np.arange(0,heat_map_x.shape[1],step), labels=heatmap_t_arr[::step])
-ax3.set_xticks([])
-#ax3.set_ylim(0,node_num)
-ax3.set_yticks([-32, -16, 0, 16, 32])
-
-#ax3.set_ylabel('State Index')
-#add a vertical dash line at the middle of x
-x_mid = (plt.xlim()[0] + plt.xlim()[1]) / 2
-#ax3.axvline(x=x_mid, color='k', linestyle='--')
-ax3.set_title("Identified System")
-
-ax4 = fig.add_subplot(gs[4, 1])
-ax4.set_position([ax4.get_position().x0, ax4.get_position().y0 + 0.03, ax4.get_position().width, ax4.get_position().height])
-ax4.plot(t_arr, pred_amp[node_num//2-1, :],'k', linewidth=2.0)
-ax4.set_xlim(0,data_T)
-ax4.set_ylim(-0.2, 1.0)
-#ax4.set_xlabel(r'Time, $t$')
-#ax4.set_ylabel(r'Derivative, $\dot{x}_1$')
-ax4.set_xticks([0, 60, 120, 180])
-ax4.set_yticks([0, 0.5])
-#add a vertical dash line at the middle of x axis
-#ax4.axvline(x=reference_line, color='k', linestyle='--')
-
-#ax2.text(-0.05, -0.8, '(a)', transform=ax2.transAxes, size=14,  fontweight='bold')
-#ax4.text(-0.05, -0.8, '(b)', transform=ax4.transAxes, size=14,  fontweight='bold')
-
-cbar1_ax = fig.add_subplot(gs[:4, 2])
-cbar1_ax.set_position([cbar1_ax.get_position().x0, cbar1_ax.get_position().y0 + 0.03, cbar1_ax.get_position().width, cbar1_ax.get_position().height])
-cbar = fig.colorbar(cax1, ax=ax1, orientation='vertical', cax=cbar1_ax)
-cbar.set_label(r'$| u_i|$')
-
-
-ax5 = fig.add_subplot(gs[5:-1, 0])
-ax5.set_position([ax5.get_position().x0, ax5.get_position().y0 - 0.02, ax5.get_position().width, ax5.get_position().height])
-
-cax5 = ax5.imshow(sim_amp, aspect='auto', cmap='cmo.tempo', extent=[0, data_T, -node_num//2, node_num//2])
-ax5.set_xlim(0,10)
+cax5 = ax5.imshow(sim_amp, aspect='auto', cmap='cmo.thermal', extent=[t0, tf, -node_num//2, node_num//2])
+ax5.set_xlim(t0, tf)
 ax5.set_xticks([])
 #ax5.set_ylim(0,node_num)
 ax5.set_yticks([-32,-16,0, 16,32])
 
-ax5.set_ylabel(r'$| u_i|$')
+ax5.set_ylabel(r'State Index, $i$')
+#ax5.set_title("Full Simulation")
 #x_mid = (plt.xlim()[0] + plt.xlim()[1]) / 2
 #ax5.axvline(x=x_mid, color='k', linestyle='--')
 
 ax6 = fig.add_subplot(gs[-1, 0])
-ax6.set_position([ax6.get_position().x0, ax6.get_position().y0 - 0.02, ax6.get_position().width, ax2.get_position().height])
-ax6.plot(t_arr, sim_amp[node_num//2-1,:],'k', linewidth=2.0)
-ax6.set_xlim(0,10)
-ax6.set_ylim(0,1)
-ax6.set_xticks([0, 1, 2, 3, 4])
-ax6.set_yticks([0, 0.5])
-ax6.set_ylabel(r'${u}_{32}$')
-ax6.set_xlabel(r'Time, $t$')
+ax6.set_position([ax6.get_position().x0, ax6.get_position().y0 + 0.02, ax6.get_position().width, ax6.get_position().height])
+ax6.plot(t_arr, sim_amp[node_num//2,:],'k', linewidth=2.0)
+ax6.set_xlim(t0,tf)
+ax6.set_ylim(0,8)
+ax6.set_yticks([0,4])
+ax6.set_xticks([-5, -2.5, 0, 2.5, 5])
+#ax6.set_xlabel(r'Time, $t$')
+ax6.set_ylabel(r'$|{u}_{1}|$', rotation=0)
+ax6.yaxis.set_label_coords(-0.15, 0.3)  # Move the label slightly to the left; adjust x-value as needed
 #ax6.set_yticks([-5, 5])
 #reference_line = 25 
 #ax6.axvline(x=reference_line, color='k', linestyle='--')
 
 
 #### 3 and 4
-ax7 = fig.add_subplot(gs[5:-1, 1])
-ax7.set_position([ax7.get_position().x0, ax7.get_position().y0 - 0.02, ax7.get_position().width, ax7.get_position().height])
+ax7 = fig.add_subplot(gs[0:4, 1])
+ax7.set_position([ax7.get_position().x0, ax7.get_position().y0 + 0.02, ax7.get_position().width, ax7.get_position().height])
 
-cax7 = ax7.imshow(pred_amp, aspect='auto', extent=[0, data_T, -node_num//2, node_num//2], cmap='cmo.tempo')
-ax7.set_xlim(0,10)
+cax7 = ax7.imshow(pred_amp, aspect='auto', extent=[t0, tf, -node_num//2, node_num//2], cmap='cmo.thermal')
+ax7.set_xlim(t0, tf)
 ax7.set_xticks([])
 #ax7.set_ylim(0, node_num)
-ax7.set_yticks([-32,-16,0,16, 32])
+ax7.set_yticks([])
+#ax7.set_title("Identified System")
 
 #ax3.set_ylabel('State Index')
 #add a vertical dash line at the middle of x
@@ -208,34 +145,34 @@ ax7.set_yticks([-32,-16,0,16, 32])
 
 ax8 = fig.add_subplot(gs[-1, 1])
 
-ax8.set_position([ax8.get_position().x0, ax8.get_position().y0 - 0.02, ax8.get_position().width, ax8.get_position().height])
+ax8.set_position([ax8.get_position().x0, ax8.get_position().y0 + 0.02, ax8.get_position().width, ax8.get_position().height])
 
-ax8.plot(t_arr, pred_amp[node_num//2-1,:],'k', linewidth=2.0)
-ax8.set_xlim(0,10)
-ax8.set_ylim(0, 1)
-ax8.set_xlabel(r'Time, $t$')
+ax8.plot(t_arr, pred_amp[node_num//2,:],'k', linewidth=2.0)
+ax8.set_xlim(t0, tf)
+ax8.set_ylim(0, 8)
+#ax8.set_xlabel(r'Time, $t$')
 #ax4.set_ylabel(r'Derivative, $\dot{x}_1$')
-ax8.set_xticks([0, 1,2,3,4])
-ax8.set_yticks([0,0.5])
+ax8.set_xticks([-5, -2.5, 0, 2.5, 5])
+ax8.set_yticks([])
 #add a vertical dash line at the middle of x axis
 #ax8.axvline(x=reference_line, color='k', linestyle='--')
 
 #ax6.text(-0.05, -0.8, '(c)', transform=ax6.transAxes, size=14, weight='bold')
 #ax8.text(-0.05, -0.8, '(d)', transform=ax8.transAxes, size=14, weight='bold')
 
-cbar_ax = fig.add_subplot(gs[5:-1, 2])
-cbar_ax.set_position([cbar_ax.get_position().x0, cbar_ax.get_position().y0 - 0.03, cbar_ax.get_position().width, cbar_ax.get_position().height])
+cbar_ax = fig.add_subplot(gs[:4, 2])
+cbar_ax.set_position([cbar_ax.get_position().x0, cbar_ax.get_position().y0 + 0.02, cbar_ax.get_position().width, cbar_ax.get_position().height])
 cbar = fig.colorbar(cax5, ax=ax5, orientation='vertical', cax=cbar_ax)
 cbar.set_label(r'$| u_i |$')
 
 
 # Adjust the X label position for ax6
-ax6.xaxis.set_label_coords(0.5, -0.7)  # Move the label slightly up; adjust y-value as needed
+#ax6.xaxis.set_label_coords(0.5, -0.7)  # Move the label slightly up; adjust y-value as needed
 
 # Adjust the X label position for ax8
-ax8.xaxis.set_label_coords(0.5, -0.7)  # Move the label slightly up; adjust y-value as needed
-
-plt.savefig("AL_gaussian_ic_simulation_vs_infer", dpi=600)
+#ax8.xaxis.set_label_coords(0.5, -0.7)  # Move the label slightly up; adjust y-value as needed
+#plt.tight_layout()
+plt.savefig("AL_KM_breather_simulation_vs_infer", dpi=600)
 
 
 ################################
@@ -279,7 +216,7 @@ plt.xlabel(r'Time, $t$')
 cbar9.set_label(r'$| u_i - \hat{u}_i |$')
 
 plt.tight_layout()
-plt.savefig("AL_gaussian_ic_error", dpi=1200)
+plt.savefig("AL_KM_breather_error", dpi=1200)
 
 ###############################
 ################################
@@ -290,13 +227,13 @@ fig3 = plt.figure(figsize=(8, 6))
 
 gs = fig3.add_gridspec(4, 2)
 
-points_to_plot = 4000
+points_to_plot = -1
 
 ax11 = fig3.add_subplot(gs[0:2, 0])
 ax11.plot(t_arr[:points_to_plot], sim_amp[9,:points_to_plot], 'k', label='True')
 ax11.plot(t_arr[:points_to_plot], pred_amp[9,:points_to_plot], 'r--', label='pred_dxicted')
 ax11.set_ylabel(r'$| u_{10} |$')
-ax11.set_xticks([0, 10, 20, 30, 40])
+ax11.set_xticks([-2, 0, 2, 4, 6])
 #reference_line = 60 
 #ax11.axvline(x=reference_line, color='k', linestyle='--')
 
@@ -305,7 +242,7 @@ ax12 = fig3.add_subplot(gs[0:2, 1])
 ax12.plot(t_arr[:points_to_plot], sim_amp[14,:points_to_plot], 'k', label='True')
 ax12.plot(t_arr[:points_to_plot], pred_amp[14,:points_to_plot], 'r--', label='pred_dxicted')
 ax12.set_ylabel(r'$| u_{15} |$')
-ax12.set_xticks([0, 10, 20, 30, 40])
+ax12.set_xticks([-2, 0, 2, 4, 6])
 #ax12.axvline(x=reference_line, color='k', linestyle='--')
 
 
@@ -314,7 +251,7 @@ ax13.plot(t_arr[:points_to_plot], sim_amp[19,:points_to_plot], 'k', label='True'
 ax13.plot(t_arr[:points_to_plot], pred_amp[19,:points_to_plot], 'r--', label='pred_dxicted')
 ax13.set_xlabel(r'Time, $t$')
 ax13.set_ylabel(r'$| u_{20} |$')
-ax13.set_xticks([0, 10, 20, 30, 40])
+ax13.set_xticks([-2, 0, 2, 4, 6])
 #ax13.axvline(x=reference_line, color='k', linestyle='--')
 
 
@@ -324,8 +261,8 @@ ax14.plot(t_arr[:points_to_plot], pred_amp[24,:points_to_plot], 'r--', label='pr
 ax14.set_xlabel(r'Time, $t$')
 ax14.set_ylabel(r'$| u_{25} |$')
 #ax14.set_yticks([-5,0, 5, 10])
-ax14.set_xticks([0, 10, 20, 30, 40])
+ax14.set_xticks([-2, 0, 2, 4, 6])
 #ax14.axvline(x=reference_line, color='k', linestyle='--')
 
 plt.tight_layout()
-plt.savefig("AL_gaussian_ic_time_history", dpi=1200)
+plt.savefig("AL_KM_breather_time_history", dpi=1200)

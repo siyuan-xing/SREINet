@@ -30,7 +30,7 @@ plt.plot(np.abs(x0))
 plt.show()
 
 
-data_T =  500.0       # Length of the data (T)
+data_T =  1000.0       # Length of the data (T)
 data_dt = 0.01       # Resolution of the data (dt)
 myDG = DG.DataGenerator(x0,T=data_T, dt=data_dt)
 t_arr, x_train, dx_train, guess_highest_order_polynomial = myDG.generate_dataset_by_model_name(MY_MODEL, node_num, method='BDF')
@@ -92,6 +92,11 @@ print(sim_amp.shape)
 
 my_size = 110/25.4 #110mm
 
+
+import matplotlib.colors as mcolors
+import cmocean
+
+"""
 fig = plt.figure(figsize=(my_size*2, my_size))
 
 gs = fig.add_gridspec(10, 3, width_ratios=[20, 20, 1], hspace=0.1, wspace=0.2)
@@ -237,7 +242,7 @@ ax8.xaxis.set_label_coords(0.5, -0.7)  # Move the label slightly up; adjust y-va
 
 plt.savefig("AL_gaussian_ic_simulation_vs_infer", dpi=600)
 
-
+"""
 ################################
 #############
 ############# error plot
@@ -270,7 +275,7 @@ cax9 = plt.imshow(np.abs(pred_amp-sim_amp), extent=[0, data_T, 0, node_num], asp
 cbar9=fig2.colorbar(cax9)  # Display a colorbar to interpret the color scale
 plt.ylim(0,30)
 plt.yticks([0,10,20,30])
-plt.xticks([0, 60, 120, 180])
+#plt.xticks([0, 60, 120, 180])
 plt.ylabel(r'State Index, $i$')
 plt.xlabel(r'Time, $t$')
 #plt.axvline(x=60, color='k', linestyle='--')
@@ -290,13 +295,13 @@ fig3 = plt.figure(figsize=(8, 6))
 
 gs = fig3.add_gridspec(4, 2)
 
-points_to_plot = 4000
+points_to_plot = -1
 
 ax11 = fig3.add_subplot(gs[0:2, 0])
 ax11.plot(t_arr[:points_to_plot], sim_amp[9,:points_to_plot], 'k', label='True')
 ax11.plot(t_arr[:points_to_plot], pred_amp[9,:points_to_plot], 'r--', label='pred_dxicted')
 ax11.set_ylabel(r'$| u_{10} |$')
-ax11.set_xticks([0, 10, 20, 30, 40])
+#ax11.set_xticks([0, 125, 250, 375, 500])
 #reference_line = 60 
 #ax11.axvline(x=reference_line, color='k', linestyle='--')
 
@@ -305,7 +310,7 @@ ax12 = fig3.add_subplot(gs[0:2, 1])
 ax12.plot(t_arr[:points_to_plot], sim_amp[14,:points_to_plot], 'k', label='True')
 ax12.plot(t_arr[:points_to_plot], pred_amp[14,:points_to_plot], 'r--', label='pred_dxicted')
 ax12.set_ylabel(r'$| u_{15} |$')
-ax12.set_xticks([0, 10, 20, 30, 40])
+#ax12.set_xticks([0, 125, 250, 375, 500])
 #ax12.axvline(x=reference_line, color='k', linestyle='--')
 
 
@@ -314,7 +319,7 @@ ax13.plot(t_arr[:points_to_plot], sim_amp[19,:points_to_plot], 'k', label='True'
 ax13.plot(t_arr[:points_to_plot], pred_amp[19,:points_to_plot], 'r--', label='pred_dxicted')
 ax13.set_xlabel(r'Time, $t$')
 ax13.set_ylabel(r'$| u_{20} |$')
-ax13.set_xticks([0, 10, 20, 30, 40])
+#ax13.set_xticks([0, 125, 250, 375, 500])
 #ax13.axvline(x=reference_line, color='k', linestyle='--')
 
 
@@ -324,7 +329,7 @@ ax14.plot(t_arr[:points_to_plot], pred_amp[24,:points_to_plot], 'r--', label='pr
 ax14.set_xlabel(r'Time, $t$')
 ax14.set_ylabel(r'$| u_{25} |$')
 #ax14.set_yticks([-5,0, 5, 10])
-ax14.set_xticks([0, 10, 20, 30, 40])
+#ax14.set_xticks([0, 125, 250, 375, 500])
 #ax14.axvline(x=reference_line, color='k', linestyle='--')
 
 plt.tight_layout()
