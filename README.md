@@ -93,8 +93,10 @@ The following packages are automatically installed via `requirements.txt`:
 - **scikit-learn>=1.0.0** - Machine learning utilities
 - **openpyxl>=3.0.0** - Excel file handling
 - **packaging>=21.0** - Version comparison utilities
-- **seaborn>=0.11.0** -  Data visualization
-- **ipykernel>=6.0.0** - Jupyter kernel for Python 
+- **seaborn>=0.11.0** - Data visualization
+- **ipykernel>=6.0.0** - Jupyter kernel for Python
+- **scikit-image>=0.24.0** - Image processing and computer vision
+- **cmocean>=4.0.3** - Oceanographic colormaps for matplotlib 
 
 
 ## 📚 Usage
