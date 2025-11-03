@@ -26,6 +26,7 @@ def lorenz(t, x, sigma=10.0, beta=2.66667, rho=28.0):
              x[0] * (rho - x[2]) - x[1], 
              x[0] * x[1] - beta * x[2])
 
+
 def lorenz96(t, x, F=8):
     """
     The Lorenz-96 model with n variables. The model is governed by a set of $n$ differential equations:
@@ -125,6 +126,7 @@ def shimizu_morioka(t, x, mu=0.1, a=2, b=0.5):
             x[3],
             -b * x[3] + mu * x[2] + x[0] ** 2)
 
+
 def kuramoto(t,theta, wn:np.array, K=2.0, h=0.2):
     """
     The model parameters are obatined from the paper: https://arxiv.org/abs/1809.02448
@@ -134,6 +136,40 @@ def kuramoto(t,theta, wn:np.array, K=2.0, h=0.2):
     coupling = np.sin(theta_diffs).sum(axis=1)
     forcing = np.sin(theta)
     return wn + K*coupling/N + h*forcing
+
+
+def kuramoto_extension(t, theta, wn:np.array, K=1.0):
+    """
+    Extended Kuramoto model with constant coupling strength.
+    
+    The equations are:
+        $$
+        \dot{\theta}_i = \omega_i + K \sum_j \sin(\theta_i \cdot \theta_j)
+        $$
+    
+    Parameters:
+        t : float
+            Time (not used in autonomous system)
+        theta : np.array
+            Array of phase angles for each oscillator
+        wn : np.array
+            Natural frequencies for each oscillator
+        K : float, optional
+            Coupling strength constant (default: 1.0)
+            
+    Returns:
+        np.array
+            Time derivatives of phase angles
+    """
+    N = theta.shape[0]
+    
+    # Compute the coupling term: K * sum_j sin(theta_i * theta_j)
+    theta_products = np.multiply.outer(theta, theta)  # theta_i * theta_j for all i,j
+    sin_products = np.sin(theta_products)
+    np.fill_diagonal(sin_products, 0)  # Set diagonal elements to 0 (no self-coupling)
+    coupling = K * sin_products.sum(axis=1)  # Sum over j for each i
+    
+    return wn + coupling
 
 
 def discrete_phi_quartic(t,x, C=2.0, N=100):
@@ -217,3 +253,62 @@ def fermi_pasta_ulam(t,x, b=0.7, N=10):
     un_ddot[-1] = un[-2] - 2 * un[-1] + b*(0 - un[-1])**3 - b*(un[-1] - un[-2])**3
 
     return np.concatenate([un_dot, un_ddot])
+
+
+def modified_lotka_volterra(t, x, r, a, K, d):
+    """
+    Modified Lotka-Volterra system with exponential nonlinearity.
+        $$
+        \dot{x}_i = r_i x_i + \sum_{j=1}^{N} a_{ij} x_i x_j e^{-x_j/K_j} - d_i x_i^2
+        $$
+    """
+    N = len(x)
+    x = np.maximum(x, 1e-10)  # Prevent negative populations
+    
+    # Compute time derivatives
+    x_dot = np.zeros(N)
+    
+    for i in range(N):
+        # Linear growth term
+        linear_term = r[i] * x[i]
+        
+        # Exponential interaction terms (non-polynomial)
+        interaction_term = np.sum(a[i, :] * x[i] * x * np.exp(-x / K))
+        
+        # Self-regulation term
+        regulation_term = -d[i] * x[i]**2
+        
+        x_dot[i] = linear_term + interaction_term + regulation_term
+    
+    return x_dot
+
+
+
+
+def rosenzweig_macarthur(t, x, r=1.0, K=5.0, a=1.0, h=0.1, b=0.1, d=0.1):
+    """
+    Rosenzweig–MacArthur model with rational nonlinearity.
+      
+    """
+
+    x1, x2 = x
+    dx1 = r*x1*(1 - x1/K) - a*x1*x2/(1 + a*h*x2)
+    dx2 = b*x1*x2/(1 + a*h*x2) - d*x2 #- delta*x2**3
+    return (dx1, dx2)
+
+
+def lorenz96_sin(t, x, F=3.0, alpha=0.5):
+    """
+    Lorenz-96 with a sinusoidal coupling extension: dx_i = (x_{i+1}-x_{i-2})x_{i-1} - x_i + F
+                                                    + alpha * sin(x_i * x_{i+1})
+    Periodic boundary conditions. 
+
+    """
+    # Periodic neighbors via roll (vectorized, no explicit loops)
+    x_ip1 = np.roll(x, -1)   # x_{i+1}
+    x_im1 = np.roll(x, 1)    # x_{i-1}
+    x_im2 = np.roll(x, 2)    # x_{i-2}
+
+    ext  = alpha * np.sin(x * x_ip1)
+    dx = (x_ip1 - x_im2) * x_im1 - x + F + ext
+    return dx

@@ -11,9 +11,9 @@ This module is used to generate data for the ODE models.
     Version: 1.0.1 
 """
 
-
 class DataGenerator:
-    # model_mappings is a dictionary that maps model names to a tuple of the form (function, num_parameters, additional_parameters)
+    # model_mappings is a dictionary that maps model names to a tuple of the form 
+    # (function, guessed_multiplicative_order (depth of SREINet), additional_parameters)
     model_mappings = {
         'linear 3d ode':    (zoo.linear_3D, 2, {}),
         'lorenz':           (zoo.lorenz,        2, {'method': 'RK45'}),
@@ -28,14 +28,17 @@ class DataGenerator:
         "dnls":            (zoo.DNLS, 3, {}),
         "dnls_split":       (zoo.DNLS_split, 3, {}),
         "fermi_pasta_ulam": (zoo.fermi_pasta_ulam, 3, {}),
-        "abolowitz_ladik": (zoo.discrete_abolowitz_ladik, 3, {})
+        "abolowitz_ladik": (zoo.discrete_abolowitz_ladik, 3, {}),
+        "kuramoto_extension": (zoo.kuramoto_extension, 2, {}),
+        "rosenzweig_macarthur": (zoo.rosenzweig_macarthur, 3, {}),
+        "lorenz96_sin": (zoo.lorenz96_sin, 2, {}),
         }
     
     @staticmethod
     def generate_initial_conditions(n, num_conditions=1, seed=None):
         
         """
-        Generates random initial conditions for the Lorenz '96 model, ensuring
+        Generates random initial conditions for a specific model, ensuring
         that all initial conditions are greater than 1.
         """
         if seed is not None:
@@ -74,10 +77,6 @@ class DataGenerator:
         # if initial_condition is not a list ,make it a list
         if not isinstance(initial_conditions, list):
             initial_conditions = [initial_conditions]
-        
-        initial_conditions = [initial_condition.reshape(1, -1) if len(initial_condition)== 1 
-                              else initial_condition 
-                              for initial_condition in initial_conditions]
 
         self.ICs = initial_conditions
         self.T = T
@@ -210,6 +209,8 @@ class DataGenerator:
             t_span, 
             x0, 
             t_eval=t_train,
+            rtol=1e-8, 
+            atol=1e-11,
             **kwargs
         ).y.T
         

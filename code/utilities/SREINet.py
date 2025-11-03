@@ -15,7 +15,7 @@ import numpy as np
 
 class SREINet(tf.keras.Model):
     """SREINet.
-        A NN class for the Combinatorial Operation Neural Network(SREINet). 
+        A NN class for the Sparse Regression Embedded Neural Network(SREINet). 
         The input data is splitted by its dimensions and fed sequentially to each layer.
 
         Attributes:
@@ -56,7 +56,6 @@ class SREINet(tf.keras.Model):
                                                     use_bias=False, 
                                                     trainable=True)
             
-        #create linear auatoencoder
 
     def call(self, inputs, training=False):
 
@@ -187,3 +186,47 @@ class SubsequentHiddenLayer(tf.keras.layers.Layer):
     def reinitialize_weights(self):
         """Reinitialize the weights of the layer."""
         self.w.assign(self.weight_initializer(tf.shape(self.w)))
+
+
+class LiftingLayer(tf.keras.layers.Layer):
+    """
+    Simple transformation layer that generates input to SREINet. This layer allows for incorporating 
+    custom transformation functions such as 1/(ax+b) and xi*xj.
+    """
+    
+    def __init__(self, **kwargs):
+        """
+        Args:
+            input_dim: Input dimension (number of input features)
+            delta: Small constant to prevent division by zero
+            seed: Random seed
+        """
+        super(LiftingLayer, self).__init__(**kwargs)
+    
+    def build(self, input_shape):
+        self.input_dim = input_shape[-1]
+        
+        indices_pairs = []
+        for i in range(self.input_dim):
+            for j in range(i, self.input_dim):
+               indices_pairs.append([i, j])
+        
+        self.indices_pairs = tf.constant(indices_pairs, dtype=tf.int32)
+
+
+    def call(self, inputs):
+        """
+        Apply transformations: [original_coords, 1/(ax+b), custom_transforms]
+        """
+        input_dim = inputs.shape[-1]
+        tensor_prod = tf.einsum('bi,bj->bij', inputs, inputs) 
+        
+
+        B = tf.shape(tensor_prod)[0]  
+        indices = tf.tile(self.indices_pairs[None, :, :], [B, 1, 1])  # (B, 15, 2)
+
+        second_order = tf.gather_nd(tensor_prod, indices, batch_dims=1)
+
+        sine_second_order = tf.sin(second_order)
+    
+        return tf.concat([inputs, sine_second_order], axis=-1)
