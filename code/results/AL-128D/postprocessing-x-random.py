@@ -71,11 +71,11 @@ params = {
     'legend.fontsize': 14, # was 10
     'xtick.labelsize': 14,
     'ytick.labelsize': 14,
-    'text.usetex': False,
+    'text.usetex': True,
     #'figure.figsize': [7, 4],
     'font.family': 'Helvetica',
-    #'text.latex.preamble': r'\usepackage{amsmath}',  # Optional, for advanced math symbols
-    #'axes.labelweight': 'bold'
+    'text.latex.preamble': r'\usepackage{amsmath}\usepackage{helvet}\renewcommand{\familydefault}{\sfdefault}',  # Optional, for advanced math symbols
+    'axes.labelweight': 'bold'
 }
 
 import cmocean
@@ -111,10 +111,10 @@ print(heat_map_pred_x.shape)
 
 
 #ax2 line thickness set to 2
-plt.rcParams['text.usetex'] = False  # Uncomment if you have LaTeX installed
+plt.rcParams['text.usetex'] = True
 plt.rcParams['font.family'] = 'Helvetica'
-#plt.rcParams['text.latex.preamble'] = r'\usepackage{amsmath}'  # Optional, for advanced math symbols
-#plt.rcParams['axes.labelweight'] = 'bold'
+plt.rcParams['text.latex.preamble'] = r'\usepackage{amsmath}\usepackage{helvet}\renewcommand{\familydefault}{\sfdefault}'  # Optional, for advanced math symbols
+plt.rcParams['axes.labelweight'] = 'bold'
 
 import matplotlib.colors as mcolors
 
@@ -150,7 +150,8 @@ plt.xticks(ticks=[0, 250, 500])
 #plt.xlim(0, 50)
 #ax3.set_ylabel(r'State Index, $i$')
 plt.xlabel(r'Time, $t$')
-plt.ylabel(r'State Index, $j$', labelpad=-7)
+plt.ylabel(r'State Index, $i$', labelpad=-7)
+cbar_1.set_label(r'$| u_i - \hat{u}_i |$')
 
 
 plt.tight_layout()
@@ -171,11 +172,11 @@ params = {
     'legend.fontsize': 14, # was 10
     'xtick.labelsize': 14,
     'ytick.labelsize': 14,
-    'text.usetex': False,
+    'text.usetex': True,
     #'figure.figsize': [7, 4],
-    'font.family': 'Arial',
-    #'text.latex.preamble': r'\usepackage{amsmath}',  # Optional, for advanced math symbols
-    #'axes.labelweight': 'bold'
+    'font.family': 'Helvetica',
+    'text.latex.preamble': r'\usepackage{amsmath}\usepackage{helvet}\renewcommand{\familydefault}{\sfdefault}',  # Optional, for advanced math symbols
+    'axes.labelweight': 'bold'
 }
 matplotlib.rcParams.update(params)
 

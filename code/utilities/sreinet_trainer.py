@@ -129,7 +129,7 @@ class SREINetTrainer:
         # Initialize patience tracking (period-based)
         best_val_loss = 999999 #initialize to a large number
         patience_counter = 0
-        current_period = -1
+        track_period = -1
         period_best_loss = 999999 #initialize to a large number
 
         # Initialize best weights to current model state
@@ -209,12 +209,12 @@ class SREINetTrainer:
                     callback.on_epoch_end(epoch, logs=epoch_logs)
             
             # Period-based patience tracking
-            epoch_period = pruning_scheduler.get_period(epoch)
+            current_period = pruning_scheduler.get_period(epoch)
             
             # Check if we've moved to a new period
-            if epoch_period != current_period:
+            if current_period != track_period:
                 # New period started, check if previous period had improvement
-                if current_period >= 0:  # Not the first period
+                if track_period >= 0:  # Not the first period
                     if period_best_loss < best_val_loss:
                         # Calculate relative improvement
                         if best_val_loss > 1e-10:
@@ -236,7 +236,7 @@ class SREINetTrainer:
                         patience_counter += 1
                 
                 # Start tracking new period
-                current_period = epoch_period
+                track_period = current_period
                 period_best_loss = current_val_loss
             else:
                 # Same period, update period best loss
@@ -245,13 +245,13 @@ class SREINetTrainer:
             if verbose and (epoch % print_every_n_epochs == 0 or epoch == epochs - 1):
                 epoch_time = time.time() - epoch_start_time
                 if validation_split > 1e-10:
-                    print(f"Epoch {epoch + 1:3.0f} (Period {epoch_period + 1}):"
+                    print(f"Epoch {epoch + 1:3.0f} (Period {current_period + 1}):"
                         f"  Train Loss: {current_train_loss:4.3e}"
                         f",  Validation Loss: {current_val_loss:4.3e}"
                         f",  Epoch Time: {epoch_time:.2f}s"
                         f",  Current Pruning Threshold: {current_pruning_threshold:.5g}")
                 else:
-                    print(f"Epoch {epoch + 1:3.0f} (Period {epoch_period + 1}):"
+                    print(f"Epoch {epoch + 1:3.0f} (Period {current_period + 1}):"
                         f"  Train Loss: {current_train_loss:4.3e}"
                         f",  Epoch Time: {epoch_time:.2f}s"
                         f",  Current Pruning Threshold: {current_pruning_threshold:.5g}")

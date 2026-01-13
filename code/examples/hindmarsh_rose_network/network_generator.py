@@ -2,10 +2,9 @@
 Network helpers for Hindmarsh–Rose simulations.
 """
 
-from __future__ import annotations
-
 import numpy as np
 import networkx as nx
+import matplotlib.pyplot as plt
 
 
 def generate_erdos_renyi_network(
@@ -51,4 +50,41 @@ def build_adjacency_matrix(edge_list: np.ndarray, n_nodes: int) -> np.ndarray:
         adjacency[i, j] = 1.0
         adjacency[j, i] = 1.0
     return adjacency
+
+
+def visualize_network(edge_list: np.ndarray, n_nodes: int, ax: plt.Axes | None = None) -> plt.Axes:
+    """
+    Visualize an ER network using a spring layout.
+
+    Parameters
+    ----------
+    edge_list:
+        0-based edge list.
+    n_nodes:
+        Number of nodes in the network.
+    ax:
+        Optional Matplotlib axes to draw on.
+
+    Returns
+    -------
+    ax:
+        The axes containing the drawn network.
+    """
+
+    graph = nx.Graph()
+    graph.add_nodes_from(range(n_nodes))
+    graph.add_edges_from(edge_list.tolist())
+
+    if ax is None:
+        _, ax = plt.subplots(figsize=(6, 6))
+
+    pos = nx.spring_layout(graph, seed=42)
+    nx.draw_networkx_nodes(graph, pos, ax=ax, node_color="tab:blue", node_size=200, alpha=0.85)
+    nx.draw_networkx_edges(graph, pos, ax=ax, edge_color="lightgray", width=1.5, alpha=0.7)
+    nx.draw_networkx_labels(graph, pos, ax=ax, font_size=8, font_color="white")
+
+    ax.set_title(f"Connected Erdős–Rényi network (n={n_nodes}, m={len(edge_list)})")
+    ax.set_axis_off()
+
+    return ax
 

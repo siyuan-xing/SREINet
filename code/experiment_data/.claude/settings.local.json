@@ -1,9 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "Read(//Users/sixing/Library/CloudStorage/GoogleDrive-siyuanxing9132@gmail.com/**)"
-    ],
-    "deny": [],
-    "ask": []
-  }
-}

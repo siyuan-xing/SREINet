@@ -44,6 +44,17 @@ def lorenz96(t, x, F=8):
         dxdt[j] = x[(j-1) % n] * (x[(j+1) % n] - x[(j-2) % n]) - x[j] + F
     return dxdt
 
+def lorenz96_sin(t, x, F=3, alpha=0.5):
+    """
+    The Lorenz-96 model with sine(x_1x_2) nonlinearity
+    """
+    n = x.shape[0]
+    dxdt = np.zeros(n)    
+    for j in range(n):
+        dxdt[j] = x[(j-1) % n] * (x[(j+1) % n] - x[(j-2) % n]) - x[j] + F + alpha * np.sin(x[j]*x[(j+1) % n])
+    return dxdt
+
+
 def duffing(t, x, p=[0.2, 0.05, 1]):
     """
     The duffing oscillator.
@@ -255,60 +266,3 @@ def fermi_pasta_ulam(t,x, b=0.7, N=10):
     return np.concatenate([un_dot, un_ddot])
 
 
-def modified_lotka_volterra(t, x, r, a, K, d):
-    """
-    Modified Lotka-Volterra system with exponential nonlinearity.
-        $$
-        \dot{x}_i = r_i x_i + \sum_{j=1}^{N} a_{ij} x_i x_j e^{-x_j/K_j} - d_i x_i^2
-        $$
-    """
-    N = len(x)
-    x = np.maximum(x, 1e-10)  # Prevent negative populations
-    
-    # Compute time derivatives
-    x_dot = np.zeros(N)
-    
-    for i in range(N):
-        # Linear growth term
-        linear_term = r[i] * x[i]
-        
-        # Exponential interaction terms (non-polynomial)
-        interaction_term = np.sum(a[i, :] * x[i] * x * np.exp(-x / K))
-        
-        # Self-regulation term
-        regulation_term = -d[i] * x[i]**2
-        
-        x_dot[i] = linear_term + interaction_term + regulation_term
-    
-    return x_dot
-
-
-
-
-def rosenzweig_macarthur(t, x, r=1.0, K=5.0, a=1.0, h=0.1, b=0.1, d=0.1):
-    """
-    Rosenzweig–MacArthur model with rational nonlinearity.
-      
-    """
-
-    x1, x2 = x
-    dx1 = r*x1*(1 - x1/K) - a*x1*x2/(1 + a*h*x2)
-    dx2 = b*x1*x2/(1 + a*h*x2) - d*x2 #- delta*x2**3
-    return (dx1, dx2)
-
-
-def lorenz96_sin(t, x, F=3.0, alpha=0.5):
-    """
-    Lorenz-96 with a sinusoidal coupling extension: dx_i = (x_{i+1}-x_{i-2})x_{i-1} - x_i + F
-                                                    + alpha * sin(x_i * x_{i+1})
-    Periodic boundary conditions. 
-
-    """
-    # Periodic neighbors via roll (vectorized, no explicit loops)
-    x_ip1 = np.roll(x, -1)   # x_{i+1}
-    x_im1 = np.roll(x, 1)    # x_{i-1}
-    x_im2 = np.roll(x, 2)    # x_{i-2}
-
-    ext  = alpha * np.sin(x * x_ip1)
-    dx = (x_ip1 - x_im2) * x_im1 - x + F + ext
-    return dx

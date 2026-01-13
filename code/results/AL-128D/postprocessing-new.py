@@ -104,7 +104,7 @@ print(heat_map_dx.shape)
 print(heat_map_pred_dx.shape)
 #print(heat_map_pred_x.shape)
 
-fig = plt.figure(figsize=(1.45, 4.2))
+fig = plt.figure(figsize=(1.8, 4.2))
 fig.patch.set_facecolor((0.95, 0.95, 0.95, 0.1))  # RGBA format where A=0.5 for transparency
 
 gs = fig.add_gridspec(3, 2, hspace=0.1, width_ratios=[20, 1])

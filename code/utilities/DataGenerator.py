@@ -17,12 +17,13 @@ class DataGenerator:
     model_mappings = {
         'linear 3d ode':    (zoo.linear_3D, 2, {}),
         'lorenz':           (zoo.lorenz,        2, {'method': 'RK45'}),
-        'duffing':          (zoo.duffing,       5, {}),
+        'duffing':          (zoo.duffing,       3, {}),
         'meanfield':        (zoo.meanfield,     2, {}),
         'mhd':              (zoo.mhd,           2, {}),
         'lorenz_4d':        (zoo.lorenz_4d,     2, {}),
         'shimizu morioka':  (zoo.shimizu_morioka, 2, {}),
         'lorenz_96':        (zoo.lorenz96,      2, {}),  # Adding arguments specific to Lorenz 96
+        'lorenz_96_sin':    (zoo.lorenz96_sin, 2,{}),
         'kuramoto':         (zoo.kuramoto,      2, {}), 
         "discrete_phi_quartic": (zoo.discrete_phi_quartic, 3, {}),
         "dnls":            (zoo.DNLS, 3, {}),
@@ -30,8 +31,6 @@ class DataGenerator:
         "fermi_pasta_ulam": (zoo.fermi_pasta_ulam, 3, {}),
         "abolowitz_ladik": (zoo.discrete_abolowitz_ladik, 3, {}),
         "kuramoto_extension": (zoo.kuramoto_extension, 2, {}),
-        "rosenzweig_macarthur": (zoo.rosenzweig_macarthur, 3, {}),
-        "lorenz96_sin": (zoo.lorenz96_sin, 2, {}),
         }
     
     @staticmethod

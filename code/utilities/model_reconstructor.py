@@ -7,6 +7,7 @@ directly process SREINet neural network weights.
 """
 
 import re
+import sys
 import numpy as np
 from scipy.integrate import solve_ivp
 

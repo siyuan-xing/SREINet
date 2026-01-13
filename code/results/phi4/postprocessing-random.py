@@ -249,11 +249,11 @@ params = {
     'legend.fontsize': 14, # was 10
     'xtick.labelsize': 14,
     'ytick.labelsize': 14,
-    #'text.usetex': True,
+    'text.usetex': True,
     #'figure.figsize': [7, 4],
-    'font.family': 'Arial',
-    #'text.latex.preamble': r'\usepackage{amsmath}',  # Optional, for advanced math symbols
-    #'axes.labelweight': 'bold'
+    'font.family': 'Helvetica',
+    'text.latex.preamble': r'\usepackage{amsmath}\usepackage{helvet}\renewcommand{\familydefault}{\sfdefault}',  # Optional, for advanced math symbols
+    'axes.labelweight': 'bold'
 }
 matplotlib.rcParams.update(params)
 

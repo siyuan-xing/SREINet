@@ -194,8 +194,8 @@ params = {
     'text.usetex': True,
     #'figure.figsize': [7, 4],
     'font.family': 'Helvetica',
-    #'text.latex.preamble': r'\usepackage{amsmath}',  # Optional, for advanced math symbols
-    #'axes.labelweight': 'bold'
+    'text.latex.preamble': r'\usepackage{amsmath}\usepackage{helvet}\renewcommand{\familydefault}{\sfdefault}',  # Optional, for advanced math symbols
+    'axes.labelweight': 'bold'
 }
 matplotlib.rcParams.update(params)
 

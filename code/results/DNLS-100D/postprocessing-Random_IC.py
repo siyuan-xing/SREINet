@@ -208,11 +208,11 @@ params = {
     'legend.fontsize': 14, # was 10
     'xtick.labelsize': 14,
     'ytick.labelsize': 14,
-    #'text.usetex': True,
+    'text.usetex': True,
     #'figure.figsize': [7, 4],
-    'font.family': 'Arial',
-    #'text.latex.preamble': r'\usepackage{amsmath}',  # Optional, for advanced math symbols
-    #'axes.labelweight': 'bold'
+    'font.family': 'Helvetica',
+    'text.latex.preamble': r'\usepackage{amsmath}\usepackage{helvet}\renewcommand{\familydefault}{\sfdefault}',  # Optional, for advanced math symbols
+    'axes.labelweight': 'bold'
 }
 matplotlib.rcParams.update(params)
 
@@ -224,12 +224,12 @@ plt.ylim(0,30)
 plt.yticks([0, 12.5, 25, 37.5, 50], [-25, -12.5, 0, 12.5, 25])
 #plt.set_yticklabels([-25, 0, 25])
 plt.xticks([0, 40, 80, 120, 160])
-plt.ylabel(r'State Index, $j$')
+plt.ylabel(r'State Index, $i$')
 plt.xlabel(r'Time, $t$')
 #plt.axvline(x=60, color='k', linestyle='--')
 
 #set colobar label
-cbar9.set_label(r'$| u_j - \hat{u}_j |$')
+cbar9.set_label(r'$| u_i - \hat{u}_i |$')
 
 plt.tight_layout()
 plt.savefig("DNLS_error_random_IC", dpi=1200)

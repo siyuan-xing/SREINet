@@ -366,7 +366,7 @@ plot_kuramoto_phases(pred_x_arr[0,0::10],
                      x_arr[0,0::10], 
                      dx_arr[0,0::10],
                      ax11,
-                     "t=0")
+                     r"$t=0$")
 
 t=100
 ax12 = fig3.add_subplot(gs[0:2, 1], projection='polar')
@@ -375,7 +375,7 @@ plot_kuramoto_phases(pred_x_arr[t,0::10],
                      x_arr[t,0::10], 
                      dx_arr[t,0::10],
                      ax12,
-                     "t=10")
+                     r"$t=10$")
 
 t=200
 ax13 = fig3.add_subplot(gs[2:4, 0], projection='polar')
@@ -384,7 +384,7 @@ plot_kuramoto_phases(pred_x_arr[t,0::10],
                      x_arr[t,0::10], 
                      dx_arr[t,0::10],
                      ax13,
-                     "t=20")
+                     r"$t=20$")
 
 t=300
 ax14 = fig3.add_subplot(gs[2:4, 1], projection='polar')
@@ -393,9 +393,11 @@ plot_kuramoto_phases(pred_x_arr[t,0::10],
                      x_arr[t,0::10], 
                      dx_arr[t,0::10],
                      ax14,
-                     "t=30")
+                     r"$t=30$")
 
-fig3.subplots_adjust(left=0.05, right=0.95, top=0.95, bottom=0.05, wspace=0.2, hspace=0.3)
+# Adjust subplot spacing to give more room for polar plots
+# Increase margins to prevent circle clipping
+fig3.subplots_adjust(left=0.08, right=0.92, top=0.92, bottom=0.08, wspace=0.3, hspace=0.4)
 
 #plt.tight_layout()
 plt.savefig("Kuramoto_time_history", dpi=600)

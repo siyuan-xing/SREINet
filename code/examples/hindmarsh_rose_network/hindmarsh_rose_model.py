@@ -2,11 +2,7 @@
 Hindmarsh–Rose neuron dynamics.
 """
 
-from __future__ import annotations
-
 import numpy as np
-
-from .coupling import diffusive_coupling
 
 
 def hindmarsh_rose_network(
@@ -40,3 +36,15 @@ def hindmarsh_rose_network(
 
     return np.concatenate([dx, dy, dz])
 
+
+def diffusive_coupling(values: np.ndarray, edge_list: np.ndarray) -> np.ndarray:
+    """
+    Compute the Laplacian coupling (pairwise diffusive) for a scalar field.
+    """
+
+    coupling = np.zeros_like(values)
+    for i, j in edge_list:
+        diff = values[j] - values[i]
+        coupling[i] += diff
+        coupling[j] -= diff
+    return coupling
