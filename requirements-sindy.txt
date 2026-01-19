@@ -1,0 +1,2 @@
+# Optional dependencies for SINDy comparison notebooks
+pysindy>=2.0.0

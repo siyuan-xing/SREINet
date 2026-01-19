@@ -98,6 +98,15 @@ The following packages are automatically installed via `requirements.txt`:
 - **scikit-image>=0.24.0** - Image processing and computer vision
 - **cmocean>=4.0.3** - Oceanographic colormaps for matplotlib
 
+### Optional Packages (SINDy Comparison)
+
+SINDy is used only in comparison/ablation notebooks (e.g., `code/empirical_data/` and `code/ablation/`).
+If you want to run those notebooks, install the optional dependencies:
+
+```bash
+pip install -r requirements-sindy.txt
+```
+
 ## 📚 Usage
 
 ### Data Download
