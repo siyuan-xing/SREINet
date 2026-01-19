@@ -1,5 +1,15 @@
 # Triple Pendulum Data Files
-code/experiment_data/TriplePendulum_Data/*.mat
+code/experiment_data/TriplePendulum_Data/
+code/experiment_data/DoublePendulum_Data/
+
+code/archived/
+
+code/ablation/archived/
+
+results/ablation/output/
+
+results/training_outputs/
+
 
 # Python
 __pycache__/

@@ -6,7 +6,7 @@
 
 ## 📖 Overview
 
-SREINet (Sparse Regression Embedded Interpretable Network) is a machine-learning framework that is specifically designed for learning governing equations of spatiotemporal dynamical systems. This framework addresses the fundamental challenge of the "curse of dimensionality" that plagues existing approaches like sparse optimization, symbolic regression, and Kolmogorov-Arnold networks.
+SREINet (Sparse Regression Embedded Interpretable Network) is a machine-learning framework that is designed for learning governing equations of high-dimensional dynamical systems. This framework addresses the fundamental challenge of the "curse of dimensionality" that plagues existing approaches like sparse optimization, symbolic regression, and Kolmogorov-Arnold networks.
 
 ### Key Innovation
 
@@ -22,11 +22,10 @@ SREINet integrates an interpretable neural network incorporating the matrix form
 
 ## 🏗️ Network Architecture
 
-
 SREINet employs an interpretable neural network architecture that combines:
 
 1. **Matrix Formulation of Sparse Regression**: Incorporates sparse regression principles directly into the network structure
-2. **Sparsity-Promoting Pruning**: Periodic, piecewise-continuous plateau schedule for computational efficiency
+2. **Sparsity-Promoting Pruning**: S-shaped periodic pruning schedule for computational efficiency
 3. **Interpretable Structure**: Direct mapping from network weights to governing equations
 4. **Dimensionality Reduction**: Reduces space complexity from O[m(n+p)!/(n!p!)] to O(mpn²)
 
@@ -34,16 +33,17 @@ SREINet employs an interpretable neural network architecture that combines:
 
 ### Figure 1: Schematic illustration of the structure of SREINet and the process of using it to discover governing equations.
 
-![Figure 1](figs/Figure%209.png)
+![Figure 1](figs/Figure_11.png)
 
 **Key Features**:
+
 - No composition of activation functions
 - Explicit form can be written as sum of all combinations up to $p$th order
 - Direct interpretability through forward propagation
 
-
 ### Figure 2: Performance Comparison
-![Figure 2](figs/Figure%202.png)
+
+![Figure 2](figs/Figure_2.png)
 
 ## 🚀 Installation
 
@@ -54,32 +54,32 @@ SREINet employs an interpretable neural network architecture that combines:
 
 ### Setup
 
-#### Using Conda 
+#### Using Conda
 
 1. **Create and activate conda environment**:
+
    ```bash
    conda create -n sreinet python=3.10.13
    conda activate sreinet
    ```
-
 2. **Clone the repository**:
+
    ```bash
    git clone https://github.com/siyuan-xing/SREINet.git
    cd SREINet
    ```
-
 3. **Install dependencies**:
+
    ```bash
    pip install -r requirements.txt
    ```
-
 4. **Verify installation**:
+
    ```python
    import tensorflow as tf
    print(f"TensorFlow version: {tf.__version__}")
    # Should output: TensorFlow version between 2.10.0 and 2.15.0
    ```
-
 
 ### Required Packages
 
@@ -96,8 +96,7 @@ The following packages are automatically installed via `requirements.txt`:
 - **seaborn>=0.11.0** - Data visualization
 - **ipykernel>=6.0.0** - Jupyter kernel for Python
 - **scikit-image>=0.24.0** - Image processing and computer vision
-- **cmocean>=4.0.3** - Oceanographic colormaps for matplotlib 
-
+- **cmocean>=4.0.3** - Oceanographic colormaps for matplotlib
 
 ## 📚 Usage
 
@@ -106,59 +105,79 @@ The following packages are automatically installed via `requirements.txt`:
 For the triple pendulum experimental data (Credit: [MultiArm-Pendulum](https://github.com/dynamicslab/MultiArm-Pendulum)):
 
 ```bash
-cd code/experiment_data
+cd code/emprical_data
 python download_data.py
 ```
 
-This will download ~65MB of experimental data to `code/experiment_data/TriplePendulum_Data/`.
+This will download ~65MB of experimental data to `code/emprical_data/TriplePendulum_Data/`.
 
-**Data Source**: The experimental triple pendulum data is from the [MultiArm-Pendulum repository](https://github.com/dynamicslab/MultiArm-Pendulum) by Kaheman et al. (2022). 
-
+**Data Source**: The experimental triple pendulum data is from the [MultiArm-Pendulum repository](https://github.com/dynamicslab/MultiArm-Pendulum) by Kaheman et al. (2022).
 
 ### Running Examples
 
-All examples are provided as Jupyter notebooks in the `examples/` directory. 
+All examples are provided as Jupyter notebooks in the `code/examples/` directory, plus additional experimental notebooks in `code/emprical_data/`.
 
 1. **Examples**:
    - `SREINet_Lorenz96.ipynb` - Lorenz 96 system (100D)
    - `SREINet_Kuramoto.ipynb` - Kuramoto model (60D)
-   - `SREINet_Phi_4.ipynb` - Phi-4 discrete field theory
-   - `SREINet_DNLS.ipynb` - Discrete Nonlinear Schrödinger equation
-   - `SREINet_AL.ipynb` - Ablowitz-Ladik system
+   - `SREINet_Phi_4.ipynb` - Phi-4 system (100D)
+   - `SREINet_DNLS.ipynb` - Discrete Nonlinear Schrödinger equation (100D)
+   - `SREINet_AL.ipynb` - Ablowitz-Ladik system (128D)
    - `SREINet_FPU.ipynb` - Fermi-Pasta-Ulam chain
-   - `SREINet_triple_pendulum.ipynb` - Experimental triple pendulum data
+   - `SREINet_Phi_4_noise_effect.ipynb` - Phi-4 with noise
+   - `hindmarsh_rose_network/` - Hindmarsh-Rose network notebooks (75D)
+2. **Experimental notebooks** (in `code/emprical_data/`):
+   - `SREINet_double_pendulum.ipynb`
+   - `SREINet_triple_pendulum_2layers.ipynb`
+   - `SREINet_triple_pendulum_3layers.ipynb`
+   - `SREINet_triple_pendulum_4layers.ipynb`
 
 ## 📁 Project Structure
 
 ```
 SREINet/
-├── code/                      # Main code directory
-│   ├── utilities/             # Core implementation
-│   │   ├── SREINet.py        # Main network implementation
-│   │   ├── DataGenerator.py  # Data generation utilities
-│   │   ├── Model_zoo.py      # Predefined dynamical systems
-│   │   ├── loss.py           # Loss functions
-│   │   ├── pruning_schedule.py # Pruning utilities
-│   │   └── DataLogger.py     # Data logging utilities
-│   ├── examples/              # Jupyter notebook examples
+├── code/                                 # Main code directory
+│   ├── utilities/                        # Core implementation
+│   │   ├── SREINet.py                     # Main network implementation
+│   │   ├── DataGenerator.py               # Data generation utilities
+│   │   ├── Model_zoo.py                   # Predefined dynamical systems
+│   │   ├── loss.py                        # Loss functions
+│   │   ├── pruning_scheduler.py           # Pruning utilities
+│   │   ├── sreinet_trainer.py             # Training helpers
+│   │   └── ...                            # Other utilities
+│   ├── examples/                         # Jupyter notebook examples
 │   │   ├── SREINet_Lorenz96.ipynb
 │   │   ├── SREINet_Kuramoto.ipynb
 │   │   ├── SREINet_Phi_4.ipynb
 │   │   ├── SREINet_DNLS.ipynb
 │   │   ├── SREINet_AL.ipynb
 │   │   ├── SREINet_FPU.ipynb
-│   │   ├── SREINet_triple_pendulum.ipynb
-│   │   └── ...
-│   ├── experiment_data/       # Data download scripts
-│   └── results/               # Training results and outputs
-│       ├── AL-128D/
-│       ├── DNLS-100D/
-│       ├── Kuramoto-60D/
-│       └── ...
-├── data/                      # Source data for figures
-├── figs/                      # Generated figures
-├── requirements.txt           # Python dependencies
-└── README.md                  # This file
+│   │   ├── SREINet_Phi_4_noise_effect.ipynb
+│   │   └── hindmarsh_rose_network/
+│   ├── emprical_data/                    # Experimental data + notebooks
+│   │   ├── download_data.py
+│   │   ├── TriplePendulum_Data/
+│   │   ├── DoublePendulum_Data/
+│   │   └── SREINet_triple_pendulum_*.ipynb
+│   ├── ablation/                         # Ablation studies
+│   ├── missing_library_functions/        # Missing-library experiments
+│   ├── SREINet-extension (nonseparable fns) # Nonseparable extensions
+│   ├── balancing weights/                # Weight balancing experiments
+│   └── Archived/                          # Archived experiments
+├── results/                               # Training results and outputs
+│   ├── AL_128D/
+│   ├── DNLS_100D/
+│   ├── Kuramoto_60D/
+│   ├── Lorenz_96_100D/
+│   ├── Phi4/
+│   ├── Hindmarsh_rose_network-75D/
+│   ├── training_dynamics/
+│   ├── training_outputs/
+│   └── ...
+├── data/                                  # Source data for figures
+├── figs/                                  # Generated figures
+├── requirements.txt                       # Python dependencies
+└── README.md                              # This file
 ```
 
 ## 📄 License
