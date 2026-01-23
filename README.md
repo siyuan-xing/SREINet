@@ -10,9 +10,16 @@ SREINet (Sparse Regression Embedded Interpretable Network) is a machine-learning
 
 ### Main Contributions
 
-SREINet is a neuro-symbolic framework designed to recover explicit governing equations of nonlinear dynamical systems. By replacing standard activation functions with a set of atomic basis functions and eliminating recursive composition, the network's forward pass essentially performs symbolic construction. It assembles multivariate library functions through a structured sequence of additions and multiplications, allowing the output to directly represent the system’s vector field. When combined with a specialized S-shaped periodic pruning strategy, SREINet can achieve exact recovery of the underlying governing equations.
+- **Scalability**: Capable of accurately finding governing equations of high-dimensional systems of more than 100 dimensions with a personal laptop and potentially over 1000 dimensions with cloud computing
+- **Extrapolation**: Generates correct coherent structures from untrained data
+- **Robustness**: Maintains high accuracy against intermittent noise and incomplete data
+- **Interpretability**: Direct recovery of governing equations through forward propagation
+- **Efficiency**: Consistent computational cost as data volume increases
 
 ### Network Structure
+
+SREINet is a neuro-symbolic framework designed to recover explicit governing equations of nonlinear dynamical systems. By replacing standard activation functions with a set of atomic basis functions and eliminating recursive composition, the network's forward pass essentially performs symbolic construction. It assembles multivariate library functions through a structured sequence of additions and multiplications, allowing the output to directly represent the system’s vector field. When combined with a specialized S-shaped periodic pruning strategy, SREINet can achieve exact recovery of the underlying governing equations.
+
 
 ### Figure 1: Schematic illustration of the structure of SREINet and the process of using it to discover governing equations.
 
