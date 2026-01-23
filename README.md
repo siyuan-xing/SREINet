@@ -1,4 +1,4 @@
-# Data-driven discovery of spatiotemporal dynamical systems with sparse interpretable neural networks
+# Data-driven discovery of high-dimensional dynamical systems with sparse interpretable neural networks
 
 [![Python 3.10.13](https://img.shields.io/badge/python-3.10.13-blue.svg)](https://www.python.org/downloads/)
 [![TensorFlow 2.10-2.15](https://img.shields.io/badge/tensorflow-2.10--2.15-orange.svg)](https://tensorflow.org/)
@@ -6,40 +6,17 @@
 
 ## 📖 Overview
 
-SREINet (Sparse Regression Embedded Interpretable Network) is a machine-learning framework that is designed for learning governing equations of high-dimensional dynamical systems. This framework addresses the fundamental challenge of the "curse of dimensionality" that plagues existing approaches like sparse optimization, symbolic regression, and Kolmogorov-Arnold networks.
-
-### Key Innovation
-
-SREINet integrates an interpretable neural network incorporating the matrix formulation of sparse regression with a specially designed sparsity-promoting pruning scheme. The framework reduces computational complexity of matrix-formulation from $O[m(n+p)!/(n!p!)]$ to $O(m_bpn²)$, where $m$ is the number of data points, $m_b$ is the mini-batch size, $p$ is the order of nonlinearity, and $n$ is the system dimension.
+SREINet (Sparse Regression Embedded Interpretable Network) is a machine-learning framework that is designed for learning governing equations of high-dimensional dynamical systems. This framework addresses the fundamental challenge of the "curse of dimensionality" that constrains existing approaches like sparse optimization, symbolic regression, and Kolmogorov-Arnold networks.
 
 ### Main Contributions
 
-- **Scalability**: Capable of accurately finding governing equations of spatiotemporal systems of more than 100 dimensions with a personal laptop and potentially over 1000 dimensions with cloud computing
-- **Extrapolation**: Generates correct coherent structures from untrained data
-- **Robustness**: Maintains high accuracy against intermittent noise and incomplete data
-- **Interpretability**: Direct recovery of governing equations through forward propagation
-- **Efficiency**: Consistent computational cost as data volume increases
-
-## 🏗️ Network Architecture
-
-SREINet employs an interpretable neural network architecture that combines:
-
-1. **Matrix Formulation of Sparse Regression**: Incorporates sparse regression principles directly into the network structure
-2. **Sparsity-Promoting Pruning**: S-shaped periodic pruning schedule for computational efficiency
-3. **Interpretable Structure**: Direct mapping from network weights to governing equations
-4. **Dimensionality Reduction**: Reduces space complexity from O[m(n+p)!/(n!p!)] to O(mpn²)
+SREINet is a neuro-symbolic framework designed to recover explicit governing equations of nonlinear dynamical systems. By replacing standard activation functions with a set of atomic basis functions and eliminating recursive composition, the network's forward pass essentially performs symbolic construction. It assembles multivariate library functions through a structured sequence of additions and multiplications, allowing the output to directly represent the system’s vector field. When combined with a specialized S-shaped periodic pruning strategy, SREINet can achieve exact recovery of the underlying governing equations.
 
 ### Network Structure
 
 ### Figure 1: Schematic illustration of the structure of SREINet and the process of using it to discover governing equations.
 
 ![Figure 1](figs/Figure_11.png)
-
-**Key Features**:
-
-- No composition of activation functions
-- Explicit form can be written as sum of all combinations up to $p$th order
-- Direct interpretability through forward propagation
 
 ### Figure 2: Performance Comparison
 
@@ -111,21 +88,17 @@ pip install -r requirements-sindy.txt
 
 ### Data Download
 
-For the triple pendulum experimental data (Credit: [MultiArm-Pendulum](https://github.com/dynamicslab/MultiArm-Pendulum)):
+For the experimental data 
 
 ```bash
 cd code/emprical_data
 python download_data.py
 ```
-
-This will download ~65MB of experimental data to `code/emprical_data/TriplePendulum_Data/`.
-
-**Data Source**: The experimental triple pendulum data is from the [MultiArm-Pendulum repository](https://github.com/dynamicslab/MultiArm-Pendulum) by Kaheman et al. (2022).
+**Data Source**: The experimental data is from the [MultiArm-Pendulum repository](https://github.com/dynamicslab/MultiArm-Pendulum) by Kaheman et al. (2022).
 
 ### Running Examples
 
-All examples are provided as Jupyter notebooks in the `code/examples/` directory, plus additional experimental notebooks in `code/emprical_data/`.
-
+All experiments are provided as Jupyter notebooks in the `code` directory (e.g. `code\examples` and `code\empirical_data`).
 1. **Examples**:
    - `SREINet_Lorenz96.ipynb` - Lorenz 96 system (100D)
    - `SREINet_Kuramoto.ipynb` - Kuramoto model (60D)
@@ -136,10 +109,8 @@ All examples are provided as Jupyter notebooks in the `code/examples/` directory
    - `SREINet_Phi_4_noise_effect.ipynb` - Phi-4 with noise
    - `hindmarsh_rose_network/` - Hindmarsh-Rose network notebooks (75D)
 2. **Experimental notebooks** (in `code/emprical_data/`):
-   - `SREINet_double_pendulum.ipynb`
-   - `SREINet_triple_pendulum_2layers.ipynb`
-   - `SREINet_triple_pendulum_3layers.ipynb`
-   - `SREINet_triple_pendulum_4layers.ipynb`
+   - `SREINet_triple_pendulum*.ipynb`
+   - one additional experiment with the double-pendulum system that is not presented in the paper.
 
 ## 📁 Project Structure
 
@@ -163,7 +134,7 @@ SREINet/
 │   │   ├── SREINet_FPU.ipynb
 │   │   ├── SREINet_Phi_4_noise_effect.ipynb
 │   │   └── hindmarsh_rose_network/
-│   ├── emprical_data/                    # Experimental data + notebooks
+│   ├── empirical_data/                    # Experimental data + notebooks
 │   │   ├── download_data.py
 │   │   ├── TriplePendulum_Data/
 │   │   ├── DoublePendulum_Data/
