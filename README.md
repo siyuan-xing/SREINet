@@ -98,7 +98,7 @@ pip install -r requirements-sindy.txt
 For the experimental data 
 
 ```bash
-cd code/emprical_data
+cd code/empirical_data
 python download_data.py
 ```
 **Data Source**: The experimental data is from the [MultiArm-Pendulum repository](https://github.com/dynamicslab/MultiArm-Pendulum) by Kaheman et al. (2022).
@@ -115,7 +115,7 @@ All experiments are provided as Jupyter notebooks in the `code` directory (e.g. 
    - `SREINet_FPU.ipynb` - Fermi-Pasta-Ulam chain
    - `SREINet_Phi_4_noise_effect.ipynb` - Phi-4 with noise
    - `hindmarsh_rose_network/` - Hindmarsh-Rose network notebooks (75D)
-2. **Experimental notebooks** (in `code/emprical_data/`):
+2. **Experimental notebooks** (in `code/empirical_data/`):
    - `SREINet_triple_pendulum*.ipynb`
    - one additional experiment with the double-pendulum system that is not presented in the paper.
 
