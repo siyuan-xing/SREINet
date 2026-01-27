@@ -275,7 +275,7 @@ class SREINetTrainer:
         
         # Finalize training
         training_time = time.time() - training_start_time
-        print(f'Training Stopped. Time elapsed: {training_time:.2f}s')
+        print(f'Training Stopped. Min loss: {self.best_loss:.14f}  Time elapsed: {training_time:.2f}s')
 
         # If training completed normally (not early stopped), save final weights as best if they're better
         if validation_split > 0:

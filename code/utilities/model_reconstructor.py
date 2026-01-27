@@ -73,8 +73,15 @@ class RecoveredModel:
             found_vars = set()
             found_vars.add(lhs_var)
 
+            # Avoid treating scientific-notation exponents (e/E) as variables
+            rhs_for_vars = re.sub(
+                r'(?<![a-zA-Z_])(?:\d+(?:\.\d*)?|\.\d+)[eE][+-]?\d+',
+                '0',
+                rhs_expr
+            )
+
             for pattern in self.variable_patterns:
-                potential_vars = re.findall(pattern, rhs_expr)
+                potential_vars = re.findall(pattern, rhs_for_vars)
                 # Filter out function names from potential variables
                 for var in potential_vars:
                     # Check if this variable is part of a function name

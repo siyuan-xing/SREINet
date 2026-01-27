@@ -6,7 +6,7 @@
 
 ## 📖 Overview
 
-SREINet (Sparse Regression Embedded Interpretable Network) is a machine-learning framework that is designed for learning governing equations of high-dimensional dynamical systems. This framework addresses the fundamental challenge of the "curse of dimensionality" that constrains existing approaches like sparse optimization, symbolic regression, and Kolmogorov-Arnold networks.
+SREINet (Sparse Regression Embedded Interpretable Network) is an interpretable and end-to-end machine-learning framework that is designed for learning governing equations of high-dimensional dynamical systems. This framework addresses the fundamental challenge of the "curse of dimensionality" that constrains existing approaches like sparse optimization, symbolic regression, and Kolmogorov-Arnold networks.
 
 ### Main Contributions
 
@@ -19,7 +19,6 @@ SREINet (Sparse Regression Embedded Interpretable Network) is a machine-learning
 ### Network Structure
 
 SREINet is a neuro-symbolic framework designed to recover explicit governing equations of nonlinear dynamical systems. By replacing standard activation functions with a set of atomic basis functions and eliminating recursive composition, the network's forward pass essentially performs symbolic construction. It assembles multivariate library functions through a structured sequence of additions and multiplications, allowing the output to directly represent the system’s vector field. When combined with a specialized S-shaped periodic pruning strategy, SREINet can achieve exact recovery of the underlying governing equations.
-
 
 ### Figure 1: Schematic illustration of the structure of SREINet and the process of using it to discover governing equations.
 
@@ -81,31 +80,25 @@ The following packages are automatically installed via `requirements.txt`:
 - **ipykernel>=6.0.0** - Jupyter kernel for Python
 - **scikit-image>=0.24.0** - Image processing and computer vision
 - **cmocean>=4.0.3** - Oceanographic colormaps for matplotlib
+- **pysindy<=2.0.0** - PySINDy library for Ablation 
 
-### Optional Packages (SINDy Comparison)
-
-SINDy is used only in comparison/ablation notebooks (e.g., `code/empirical_data/` and `code/ablation/`).
-If you want to run those notebooks, install the optional dependencies:
-
-```bash
-pip install -r requirements-sindy.txt
-```
-
-## 📚 Usage
+### 📚 Usage
 
 ### Data Download
 
-For the experimental data 
+For the experimental data
 
 ```bash
 cd code/empirical_data
 python download_data.py
 ```
+
 **Data Source**: The experimental data is from the [MultiArm-Pendulum repository](https://github.com/dynamicslab/MultiArm-Pendulum) by Kaheman et al. (2022).
 
 ### Running Examples
 
 All experiments are provided as Jupyter notebooks in the `code` directory (e.g. `code\examples` and `code\empirical_data`).
+
 1. **Examples**:
    - `SREINet_Lorenz96.ipynb` - Lorenz 96 system (100D)
    - `SREINet_Kuramoto.ipynb` - Kuramoto model (60D)
