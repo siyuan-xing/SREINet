@@ -142,7 +142,6 @@ SREINet/
 │   ├── ablation/                         # Ablation studies
 │   ├── missing_library_functions/        # Missing-library experiments
 │   ├── SREINet-extension (nonseparable fns) # Nonseparable extensions
-│   ├── balancing weights/                # Weight balancing experiments
 │   └── Archived/                          # Archived experiments
 ├── results/                               # Training results and outputs
 │   ├── AL_128D/
