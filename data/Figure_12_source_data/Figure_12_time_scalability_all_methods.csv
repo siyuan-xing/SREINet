@@ -1,0 +1,32 @@
+method,method_label,data_points,time_mean,time_std,repeats,num_output_dims,batch_size,epochs,early_stopping,source
+eql,EQL,3000,81.34015528361003,0.6189589290196573,3,15,512,1500,disabled,time scalability/results_fpu_eql_symbolnet_full_outputs_combined/fpu_eql_symbolnet_full_outputs_summary.csv
+eql,EQL,4000,104.41565736134847,1.9755022797069464,3,15,512,1500,disabled,time scalability/results_fpu_eql_symbolnet_full_outputs_combined/fpu_eql_symbolnet_full_outputs_summary.csv
+eql,EQL,5000,119.89830581347148,1.5774144463495698,3,15,512,1500,disabled,time scalability/results_fpu_eql_symbolnet_full_outputs_combined/fpu_eql_symbolnet_full_outputs_summary.csv
+eql,EQL,6000,140.71109557151794,0.2980560525701041,3,15,512,1500,disabled,time scalability/results_fpu_eql_symbolnet_full_outputs_combined/fpu_eql_symbolnet_full_outputs_summary.csv
+eql,EQL,7000,163.87275791168213,0.5882516985391891,3,15,512,1500,disabled,time scalability/results_fpu_eql_symbolnet_full_outputs_combined/fpu_eql_symbolnet_full_outputs_summary.csv
+eql,EQL,8000,187.57424982388815,0.5564720755418127,3,15,512,1500,disabled,time scalability/results_fpu_eql_symbolnet_full_outputs_combined/fpu_eql_symbolnet_full_outputs_summary.csv
+eql,EQL,9000,210.89853636423746,0.11830785463078786,3,15,512,1500,disabled,time scalability/results_fpu_eql_symbolnet_full_outputs_combined/fpu_eql_symbolnet_full_outputs_summary.csv
+eql,EQL,10000,234.0843915939331,0.41077418925053577,3,15,512,1500,disabled,time scalability/results_fpu_eql_symbolnet_full_outputs_combined/fpu_eql_symbolnet_full_outputs_summary.csv
+mandy,MANDy,3000,44.96333333333333,2.014552610934306,3,,,,,Comparison with Mandy/test_plot.py
+mandy,MANDy,4000,95.78333333333335,0.26157641755751454,3,,,,,Comparison with Mandy/test_plot.py
+mandy,MANDy,5000,200.70000000000002,8.299799194358053,3,,,,,Comparison with Mandy/test_plot.py
+mandy,MANDy,6000,287.58,2.4986929916791776,3,,,,,Comparison with Mandy/test_plot.py
+mandy,MANDy,7000,431.67333333333335,11.810733348197408,3,,,,,Comparison with Mandy/test_plot.py
+mandy,MANDy,8000,587.8633333333332,14.230261963701007,3,,,,,Comparison with Mandy/test_plot.py
+mandy,MANDy,9000,788.3299999999999,5.688796006186198,3,,,,,Comparison with Mandy/test_plot.py
+mandy,MANDy,10000,1115.926666666667,0.16131404843420802,3,,,,,Comparison with Mandy/test_plot.py
+sreinet,SREINet,4000,94.238,17.43797100373988,11,,64,480,loss_threshold=1e-8; pruning_threshold=0.01,Comparison with Mandy/test_plot.py
+sreinet,SREINet,5000,86.19600000000001,18.092429958913254,11,,64,480,loss_threshold=1e-8; pruning_threshold=0.01,Comparison with Mandy/test_plot.py
+sreinet,SREINet,6000,99.839,18.316808698817894,11,,64,480,loss_threshold=1e-8; pruning_threshold=0.01,Comparison with Mandy/test_plot.py
+sreinet,SREINet,7000,83.63099999999999,8.48494972396312,11,,64,480,loss_threshold=1e-8; pruning_threshold=0.01,Comparison with Mandy/test_plot.py
+sreinet,SREINet,8000,79.2226,17.334471616353984,11,,64,480,loss_threshold=1e-8; pruning_threshold=0.01,Comparison with Mandy/test_plot.py
+sreinet,SREINet,9000,100.54299999999999,21.896468810372973,11,,64,480,loss_threshold=1e-8; pruning_threshold=0.01,Comparison with Mandy/test_plot.py
+sreinet,SREINet,10000,118.29500000000002,35.2778602345334,11,,64,480,loss_threshold=1e-8; pruning_threshold=0.01,Comparison with Mandy/test_plot.py
+symbolnet,SymbolNet,3000,164.50539890925089,1.6722485369167726,3,15,512,1500,disabled,time scalability/results_fpu_eql_symbolnet_full_outputs_combined/fpu_eql_symbolnet_full_outputs_summary.csv
+symbolnet,SymbolNet,4000,215.02469062805176,3.0933791461069737,3,15,512,1500,disabled,time scalability/results_fpu_eql_symbolnet_full_outputs_combined/fpu_eql_symbolnet_full_outputs_summary.csv
+symbolnet,SymbolNet,5000,259.3442980448405,1.7296890438413495,3,15,512,1500,disabled,time scalability/results_fpu_eql_symbolnet_full_outputs_combined/fpu_eql_symbolnet_full_outputs_summary.csv
+symbolnet,SymbolNet,6000,302.781175216039,3.384666477172435,3,15,512,1500,disabled,time scalability/results_fpu_eql_symbolnet_full_outputs_combined/fpu_eql_symbolnet_full_outputs_summary.csv
+symbolnet,SymbolNet,7000,344.03723462422687,1.449637768461872,3,15,512,1500,disabled,time scalability/results_fpu_eql_symbolnet_full_outputs_combined/fpu_eql_symbolnet_full_outputs_summary.csv
+symbolnet,SymbolNet,8000,389.0120623906453,4.569424077385801,3,15,512,1500,disabled,time scalability/results_fpu_eql_symbolnet_full_outputs_combined/fpu_eql_symbolnet_full_outputs_summary.csv
+symbolnet,SymbolNet,9000,433.20805311203003,3.2115579982657874,3,15,512,1500,disabled,time scalability/results_fpu_eql_symbolnet_full_outputs_combined/fpu_eql_symbolnet_full_outputs_summary.csv
+symbolnet,SymbolNet,10000,480.91910576820374,3.1214827542698833,3,15,512,1500,disabled,time scalability/results_fpu_eql_symbolnet_full_outputs_combined/fpu_eql_symbolnet_full_outputs_summary.csv

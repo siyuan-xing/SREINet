@@ -6,6 +6,19 @@ code/archived/
 
 code/ablation/archived/
 
+# Local benchmark implementations and result archives
+code/baselines/
+code/benchmark_results/
+code/benchmarks/
+code/time scalability/
+
+# Local noise experiment outputs and records
+code/noise/Archived/
+code/noise/output/
+code/noise/results_with_dimensions/
+code/noise/phi4_sreinet_noise_settings.csv
+code/noise/record.xlsx
+
 results/ablation/output/
 
 results/training_outputs/

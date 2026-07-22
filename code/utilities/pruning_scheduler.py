@@ -123,12 +123,13 @@ class PruningScheduler:
                 'image.cmap': 'gray',
                 'axes.grid': False,
                 'savefig.dpi': 600,  # to adjust notebook inline plot size
-                'axes.labelsize': 14, # fontsize for x and y labels (was 10)
-                'axes.titlesize': 14,
-                'font.size': 14, # was 10
-                'legend.fontsize': 14, # was 10
-                'xtick.labelsize': 12,
-                'ytick.labelsize': 12,
+                'axes.labelsize': 12,
+                'axes.titlesize': 12,
+                'font.size': 10,
+                'legend.fontsize': 10,
+                'xtick.labelsize': 10,
+                'ytick.labelsize': 10,
+                'font.family': 'Helvetica',
             }
 
             import matplotlib
@@ -137,7 +138,7 @@ class PruningScheduler:
             sns.set_palette("muted")
 
             #two subplots 
-            fig, axs = plt.subplots(1,2, figsize=(8, 3))
+            fig, axs = plt.subplots(1, 2, figsize=(7.0, 2.7))
             fig.subplots_adjust(wspace=0.1)
             axs[0].plot(combined_array, linewidth=2)
             axs[0].set(ylabel='Pruning Threshold')

@@ -12,6 +12,126 @@ import numpy as np
 from scipy.integrate import solve_ivp
 
 
+def _term_key(factors):
+    counts = {}
+    for factor in factors:
+        counts[factor] = counts.get(factor, 0) + 1
+    return tuple(sorted(counts.items()))
+
+
+def parse_equation_terms(equation, minimum_coefficient_threshold=1e-3):
+    rhs = equation.split("=", 1)[1].strip()
+    normalized = rhs.replace(" - ", " + -")
+    terms = {}
+    for raw_term in normalized.split(" + "):
+        raw_term = raw_term.strip()
+        if not raw_term:
+            continue
+        raw_term = re.sub(r"^-\s+", "-", raw_term)
+        coefficient = 1.0
+        factors = []
+        for part in raw_term.split("*"):
+            part = part.strip()
+            if not part:
+                continue
+            try:
+                coefficient *= float(part)
+                continue
+            except ValueError:
+                pass
+
+            power_match = re.fullmatch(r"(.+)\^(\d+)", part)
+            if power_match:
+                factors.extend([power_match.group(1)] * int(power_match.group(2)))
+            else:
+                factors.append(part)
+
+        key = _term_key(factors)
+        terms[key] = terms.get(key, 0.0) + coefficient
+
+    return {key: value for key, value in terms.items() if abs(value) >= minimum_coefficient_threshold}
+
+
+def format_equation_terms(lhs, terms, coefficient_output_digits=10):
+    pieces = []
+    for key, coefficient in terms.items():
+        labels = []
+        for label, count in key:
+            labels.append(f"{label}^{count}" if count > 1 else label)
+
+        abs_coefficient = abs(coefficient)
+        coefficient_str = f"{abs_coefficient:.{coefficient_output_digits}g}"
+        if labels:
+            term = f"{coefficient_str}*{'*'.join(labels)}"
+        else:
+            term = coefficient_str
+
+        sign = "+" if coefficient >= 0 else "-"
+        if pieces:
+            pieces.append(f" {sign} {term}")
+        elif coefficient < 0:
+            pieces.append(f"- {term}")
+        else:
+            pieces.append(term)
+
+    return f"{lhs} = {''.join(pieces)}"
+
+
+def combine_sin_cos_squared_terms(
+    equation,
+    num_angles,
+    identity_tol=5.0e-3,
+    minimum_coefficient_threshold=1.0e-3,
+    parse_coefficient_threshold=None,
+    coefficient_output_digits=10,
+):
+    lhs = equation.split("=", 1)[0].strip()
+    parse_threshold = minimum_coefficient_threshold if parse_coefficient_threshold is None else parse_coefficient_threshold
+    terms = parse_equation_terms(equation, parse_threshold)
+    constant_key = _term_key([])
+
+    for index in range(1, num_angles + 1):
+        for cos_label, sin_label in (
+            (f"cos(x{index})", f"sin(x{index})"),
+            (f"x{index}", f"x{num_angles + index}"),
+        ):
+            cos_square = _term_key([cos_label, cos_label])
+            sin_square = _term_key([sin_label, sin_label])
+            if cos_square in terms and sin_square in terms:
+                cos_coefficient = terms[cos_square]
+                sin_coefficient = terms[sin_square]
+                if abs(cos_coefficient - sin_coefficient) <= identity_tol:
+                    terms[constant_key] = terms.get(constant_key, 0.0) + 0.5 * (
+                        cos_coefficient + sin_coefficient
+                    )
+                    del terms[cos_square]
+                    del terms[sin_square]
+
+    terms = {key: value for key, value in terms.items() if abs(value) >= minimum_coefficient_threshold}
+    return format_equation_terms(lhs, terms, coefficient_output_digits)
+
+
+def combine_sin_cos_squared_terms_in_equations(
+    equations,
+    num_angles,
+    identity_tol=5.0e-3,
+    minimum_coefficient_threshold=1.0e-3,
+    parse_coefficient_threshold=None,
+    coefficient_output_digits=10,
+):
+    return [
+        combine_sin_cos_squared_terms(
+            equation,
+            num_angles,
+            identity_tol=identity_tol,
+            minimum_coefficient_threshold=minimum_coefficient_threshold,
+            parse_coefficient_threshold=parse_coefficient_threshold,
+            coefficient_output_digits=coefficient_output_digits,
+        )
+        for equation in equations
+    ]
+
+
 class RecoveredModel:
     """
     A class for handling recovered ODEs from SREINet output.

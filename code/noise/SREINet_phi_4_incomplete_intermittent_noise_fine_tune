@@ -1,0 +1,766 @@
+# %% [markdown]
+# ## **Sparse identification of nonlinear dynamics (SINDy) with CombOpNet and periodic pruning**
+# 
+# 
+# We take inspirations from the materials below to develop this notebook.
+# 
+# - SINDy Wikipedia: ([Link](https://en.wikipedia.org/wiki/Sparse_identification_of_non-linear_dynamics))
+# - PySINDy (Python): ([Link](https://github.com/dynamicslab/pysindy))
+# - SINDy-Pi (MatLab): ([Link](https://github.com/dynamicslab/SINDy-PI))
+# 
+
+# %% [markdown]
+# ## **I. SETUP AND PREPROCESSING**
+# 
+# This section of the code handles the initial setup, data loading, and preprocessing steps required before training the machine learning model. It includes importing necessary Python packages, loading training data, and any preprocessing steps such as data normalization or feature engineering. The code also initializes and configures the hyperparameters necessary for training the machine learning model. 
+# 
+# For this project, I will be approximating the results of the SINDy algorithm using the CombOpnet structure
+
+# %%
+# Import os library to access environment variables and operating system functionalities
+import os
+
+# Set environment variable to avoid duplicate library errors, specifically for OpenMP
+os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
+# Set TensorFlow log level to '2' to suppress most messages except warnings and errors
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+
+import sys
+sys.path.append("../utilities")
+
+# Import necessary libraries for deep learning and numerical computation
+import tensorflow as tf
+import numpy as np
+from CombOpNet import * 
+import DataGenerator as DG
+
+
+# Print a formatted message to the terminal to display current time, date, and TensorFlow version
+print("**********************************************")
+print("*                                            *")
+print("*    Tensorflow Version: " + tf.__version__ + "              *")
+print("*                                            *")
+print("**********************************************")
+
+from packaging import version
+if version.parse(tf.__version__) > version.parse('2.10.0'):
+    print("Error: Tensorflow version is higher than 2.10. Please use Tensorflow 2.10 or lower.")
+    sys.exit()
+
+MY_DATA_TYPE = 'float32'
+# Set the desired data type
+tf.keras.backend.set_floatx(MY_DATA_TYPE)  
+
+
+# %% [markdown]
+# ### **1.2 Training Data**
+# 
+# Training data is loaded from MATLAB files, including input and output data. The data is then converted into TensorFlow constant tensors for further processing.
+
+# %% [markdown]
+# #### Create dataset
+
+# %%
+# Specify the model type
+MY_MODEL = 'discrete_phi_quartic' # discrete sine Gordon model 
+
+# Generate data based on the specified model type
+node_num = 10
+C = 2.0 #coupling strength
+
+
+# 设置超参数的范围
+#noise_percentage_values = [0.2, 0.3, 0.4, 0.5]
+#noise_level_values = [0.01, 0.05, 0.1, 0.15]
+#missing_percentage_values = [0.00]
+
+
+#continuous Gaussian
+noise_percentage_values = [1.0]
+noise_level_values = [0.01, 0.05, .10, .15]
+missing_percentage_values = [0.00]
+
+# 定义不同 noise_level 对应的 EARLY_STOPPING_LOSS_THRESHOLD
+loss_thresholds = {
+    0.01: 4e-3,
+    0.05: 9e-2,
+    0.10: 5e-1,
+    0.15: 5e-1,
+}
+
+pruning_thresholds ={
+    0.01: 0.5,
+    0.05: 0.5,
+    0.10: 0.8,
+    0.15: 0.8,
+}
+
+early_stopping_pruning_thresholds={
+    0.01: 0.3,
+    0.05: 0.3,
+    0.10: 0.6,
+    0.15: 0.6,
+}
+pruning_epcohs ={
+    0.01: 40,
+    0.05: 40,
+    0.10: 80,
+    0.15: 80,
+}
+
+for noise_percentage in noise_percentage_values:
+    for noise_level in noise_level_values:
+        for missing_percentage in missing_percentage_values:    #initial conditions for Simulation
+            for i in range(5,10):
+                xn = np.linspace(-node_num/2/np.sqrt(C), node_num/2/np.sqrt(C), node_num)
+
+                #x0 = np.tanh(xn/np.sqrt(1-v**2))  
+                num_traj = 1 
+                data_initial_conditions= []
+                v = np.linspace(0.0, 0.99, num_traj)
+
+                for i in range(num_traj):
+                        #0 =  np.tanh(xn/np.sqrt(1-v[i]**2))
+                        #d_x0 = 1/np.sqrt(1-v[i]**2) * (1 - np.tanh(xn/np.sqrt(1-v[i]**2))**2)
+                        x0 = np.random.normal(0, 0.5, size=xn.shape) 
+                        d_x0 = np.random.normal(0, 0.5, size=xn.shape)  
+
+                        new_IC = np.concatenate((x0, d_x0), axis=0) # add velocity
+                        data_initial_conditions.append(new_IC)
+
+
+                data_T =  250.0       # Length of the data (T)
+                data_dt = 0.01      # Resolution of the data (dt)
+                myDG = DG.DataGenerator(data_initial_conditions,T=data_T, dt=data_dt)
+
+                t_arr, x_train, dx_train, guess_highest_order_polynomial = myDG.generate_dataset_by_model_name(MY_MODEL, C, node_num)
+
+
+                #calcualte the std x_train and dx_train
+                ##print("x_train_std:", np.mean(x_train_std))
+                #print("dx_train_std:", np.mean(dx_train_std))
+                import pandas as pd
+
+                import numpy as np
+
+                num_noisy = int(noise_percentage * x_train.shape[0])
+
+                # Select random indices from the entire data set to add noise
+                noisy_indices = np.random.choice(x_train.shape[0], num_noisy, replace=False)
+
+                # Generate Gaussian noise (mean=0, std=0.2)
+                noise_level_x = noise_level * np.std(x_train, axis=0)  # Noise level is 20% of the standard deviation of the data
+                noise_level_dx = noise_level * np.std(dx_train, axis=0)
+
+                noise_x = np.random.normal(0, noise_level_x, size=[num_noisy, x_train.shape[1]])
+                noise_dx = np.random.normal(0, noise_level_dx, size=[num_noisy, dx_train.shape[1]])
+
+                # Add noise to the selected data points
+                x_data_with_noise = x_train.copy()
+                x_data_with_noise[noisy_indices, :] += noise_x
+                dx_data_with_noise = dx_train.copy()
+                dx_data_with_noise[noisy_indices, :] += noise_dx
+
+                # 2. Simulate incomplete data (set some data points to NaN after adding noise)
+                num_missing = int(missing_percentage * x_data_with_noise.shape[0])
+                missing_indices = np.random.choice(x_data_with_noise.shape[0], num_missing, replace=False)
+
+                # Set the selected indices to NaN
+                x_data_with_missing = x_data_with_noise.copy()
+                x_data_with_missing[missing_indices, :] = np.nan
+                dx_data_with_missing = dx_data_with_noise.copy()
+                dx_data_with_missing[missing_indices, :] = np.nan
+
+                # 3. Interpolate to fill missing (NaN) values using linear interpolation
+                # For each feature, perform linear interpolation on non-NaN data points
+                for i in range(x_data_with_missing.shape[1]):
+                    # Interpolate along each feature axis independently
+                    x_data_with_missing[:, i] = np.interp(
+                        np.arange(x_data_with_missing.shape[0]),  # Full index range
+                        np.where(~np.isnan(x_data_with_missing[:, i]))[0],  # Indices of non-NaN values
+                        x_data_with_missing[~np.isnan(x_data_with_missing[:, i]), i]  # Non-NaN values
+                    )
+                    dx_data_with_missing[:, i] = np.interp(
+                        np.arange(dx_data_with_missing.shape[0]),
+                        np.where(~np.isnan(dx_data_with_missing[:, i]))[0],
+                        dx_data_with_missing[~np.isnan(dx_data_with_missing[:, i]), i]
+                    )
+
+                # Extract final cleaned data
+                cleaned_x_data = x_data_with_missing
+                cleaned_dx_data = dx_data_with_missing
+
+                #Shuffle data
+                training_input, training_output = cleaned_x_data, cleaned_dx_data
+                # Optionally, save a copy of the training input for simulation
+                training_input_for_sim = training_input.copy() # Saving a copy of training input for simulation (Before shuffling)
+
+
+
+                training_input, training_output = myDG.shuffleData(training_input, training_output)
+
+                print("Training input shape:", training_input.shape)
+                print("Training output shape:", training_output.shape)
+
+                # %%
+                import seaborn as sns
+
+                #plot the data of the first set
+                heatmap_t_arr = t_arr
+
+                heatmap_x_train = x_train[:t_arr.shape[0], :node_num]
+                print(heatmap_t_arr.shape)
+                print(heatmap_x_train.shape)
+
+                #downsample
+                #plt.figure(figsize=(10, 6))
+                #a1= sns.heatmap(heat_map_dx_train, cmap='viridis', xticklabels=heatmap_t_arr, yticklabels=np.arange(heat_map_dx_train.shape[0]))
+                #a1.set_xticks([0,2.5, 5, 7.5, 10.])
+                #plt.imshow(heat_map_dx_train, aspect='auto', cmap='viridis', extent=[heatmap_t_arr[0], heatmap_t_arr[-1], 0, heat_map_dx_train.shape[0]])
+
+                #import matplotlib.colors as mcolors
+
+                #plt.imshow(heatmap_x_train.transpose(), aspect='auto', cmap='plasma')
+
+                step = 400
+
+                #plt.colorbar(label='Data Value')
+                #plt.gca().invert_yaxis()
+
+                #plt.show()
+
+                # %% [markdown]
+                # ### **1.3 Hyperparameters**
+                # 
+                # **Hyperparameters** are configuration settings that are external to the model and are not learned from the data during training. Instead, they are set before the training process begins and directly impact the behavior and performance of the model. Examples of hyperparameters include the learning rate, mini-batch size, number of epochs, regularization strength, network architecture, and activation functions.
+
+                # %%
+                # Set mini-batch size
+                MINI_BATCH_SIZE = 128
+                learning_rate = 0.01
+
+                # %% [markdown]
+                # ### **1.4 Model Architecture Definitions**
+                # 
+                # The data type for computations is set, and the architecture of the neural network is defined. This includes specifying the number of neurons in each layer, the dimensions of the model, and initializing untrainable layers.
+
+                # %% [markdown]
+                # **CombOpNet Parameters**
+                # 
+                # Used to specifly the structure of the neural network
+
+                # %%
+                # Assign dim to be the 2nd dimension of the training data (number of input variables, including the added constant 1)
+                dim = training_input.shape[1] 
+
+                # The grid size of each dimension
+                layer_neuron_nums_per_act_fn = [dim] * guess_highest_order_polynomial
+                print(layer_neuron_nums_per_act_fn)
+
+                # %% [markdown]
+                # ## **II. Model Training and Execution**
+                # 
+                # This section of the code contains the implementation of the machine learning model training and evaluation process. After configuring the hyperparameters in the preceding section, this part of the code defines the model architecture, prepares the data, and executes the training process using the specified hyperparameters.
+
+                # %% [markdown]
+                # ### **2.1 Create the CombOpNet Model**
+                # 
+
+                # %%
+                activation_fns = [lambda x:x]
+                inputs = tf.keras.layers.Input(shape=(dim,), dtype=MY_DATA_TYPE)
+                model = CombOpNet(layer_neuron_nums_per_act_fn, 
+                                    activations=activation_fns,
+                                    data_type=MY_DATA_TYPE,
+                                    weight_initializer=tf.initializers.random_normal(stddev=1e-4),
+                                    name='CombOpNet')
+                output = model(inputs)
+                model = tf.keras.Model(inputs=inputs, outputs=output)
+
+                def reinitialize_model_weights(model):
+                    if hasattr(model.layers[1], 'reinitialize_weights'):
+                            model.layers[1].reinitialize_weights()
+                    else:
+                        print("CombOpNet does not have a reinitialize_weights() function.")
+
+
+                # %% [markdown]
+                # ### **2.2 Loss Function**
+                # 
+                # Loss functions, also known as cost functions, play a crucial role in the training of neural networks. They measure the difference between the predicted outputs of the network and the actual target values. The goal of training is to minimize this loss, which guides the network towards making more accurate predictions.
+
+                # %%
+                LOSS_FUNCTION = 'mse' #This can be 'MSE', 'LASSO', or 'RIDGE' or 'ElasticNet'(case insensitive)
+                
+                from loss import *
+
+                # Example of selecting a loss function
+                loss_fn = myLoss(model, LOSS_FUNCTION) 
+
+                # %% [markdown]
+                # ### **2.3 Optimizer**
+                # 
+                # 
+                # An optimizer refers to an algorithm or method used to update the parameters (weights and biases) of the model during the training process. The goal of optimization is to minimize a predefined loss function, which measures the discrepancy between the model's predictions and the actual targets.
+
+                # %%
+                my_optimizer = tf.keras.optimizers.Adam(learning_rate=learning_rate)  # Create an Adam optimizer with the defined learning rate
+
+                # %% [markdown]
+                # ### **2.4 Training with Pruning**
+                # Gradual pruning is a technique used to reduce the size of a neural network and increase its inference speed without significantly compromising its accuracy. By slowly increasing the sparsity, the network has time to adjust its remaining weights to compensate for the pruned connections, ideally preserving its performance.
+                # 
+                # **Example Usage**
+                # - **Overview**: The example demonstrates how to integrate the gradual pruning process into a typical training loop of a TensorFlow model.
+                # - **Key Steps**:
+                #   1. A sparsity schedule is initialized using the `gradual_pruning_schedule` function.
+                #   2. For each training step, the current sparsity level is calculated using the schedule.
+                #   3. For each dense layer in the model, a binary mask is created using the `create_binary_mask` function with the current sparsity level.
+                #   4. This mask is applied to the layer's weights using the `prune_weights` function.
+                #   5. The model undergoes a typical training step, including calculating the loss and updating the weights based on gradients. However, here, an additional step involves applying the binary mask to the gradients as well, ensuring that the pruned connections do not contribute to the gradient updates.
+                #   6. Periodically, the script prints the current sparsity level to track the progress of pruning.
+
+                # %% [markdown]
+                # ### **2.5 Fit_w_pruning**
+
+                # %%
+                import time
+                np.set_printoptions(threshold=np.inf)
+
+                # Define a training step function
+                @tf.function
+                def train_step(model, optimizer, loss_fn, inputs, targets, binary_mask):        
+                    with tf.GradientTape() as tape:
+                        # Generate predictions and calculate loss
+                        predictions = model(inputs, training=False)
+                        loss = loss_fn(targets, predictions)   
+                        
+                    # Calculate gradients and update model weights
+                    gradients = tape.gradient(loss, model.trainable_variables)        
+
+                    # Assuming binary_masks_ones is a list of binary masks created for each trainable variable
+                    masked_gradients = [tf.multiply(grad, mask) for grad, mask in zip(gradients, binary_mask)]
+
+                    optimizer.apply_gradients(zip(masked_gradients, model.trainable_variables))
+
+                    return loss
+
+                # Define a validation step function
+                @tf.function
+                def val_step(model, loss_fn, inputs, targets):
+                    # Generate predictions and calculate loss for validation data
+                    predictions = model(inputs, training=False)
+                    # predictions = model(inputs, training=False) 
+                    v_loss = loss_fn(targets, predictions)
+                    # Record the validation loss
+                    return v_loss   
+
+                def CombOPNet_fit_w_pruning(
+                    model,              # TensorFlow model to be trained
+                    training_input,     # Input features for training
+                    training_output,    # Target outputs for training
+                    batch_size,         # Number of samples per batch of computation
+                    validation_split,   # Fraction of data to be used as validation set
+                    epochs,             # Number of complete passes through the training dataset
+                    optimizer,          # Optimization algorithm for updating weights
+                    loss_fn,            # Loss function to measure model's performance
+                    pruning_schedule,   # Pruning schedule for gradually increasing the sparsity level
+                    data_type='float32',    # Data type of the tensors (default: 'float32')
+                    callbacks=None,         # List of callbacks for custom actions at various stages of training
+                    early_stopping_loss_threshold=0,       # Threshold for early stopping based on training and validation loss
+                    early_stopping_pruning_threshold=0,    # Threshold for early stopping based on pruning schedule
+                    verbose=0               # Verbosity mode (0 = silent, 1 = progress bar, etc.)
+                ):
+                    # Cast the training input and output to the specified data type
+                    training_input = tf.cast(training_input, data_type)
+                    training_output = tf.cast(training_output, data_type)
+
+                    # Shuffle and batch the dataset, then split it into training and validation sets
+                    full_dataset = tf.data.Dataset.from_tensor_slices((training_input, training_output)).shuffle(buffer_size=1024)
+                    total_samples = training_input.shape[0]
+                    train_samples = int(total_samples * (1 - validation_split))
+                    
+                    # Apply the data type casting for each batch in the datasets
+                    train_dataset = full_dataset.take(train_samples).batch(batch_size).map(lambda x, y: (tf.cast(x, data_type), tf.cast(y, data_type)))
+                    val_dataset = full_dataset.skip(train_samples).batch(batch_size).map(lambda x, y: (tf.cast(x, data_type), tf.cast(y, data_type)))
+
+                    # Initialize metrics for tracking training and validation loss
+                    train_loss = tf.keras.metrics.Mean(name='train_loss', dtype=data_type)
+                    val_loss = tf.keras.metrics.Mean(name='val_loss', dtype=data_type)
+                    
+                    # Parameters initialization
+                    binary_mask = [tf.ones_like(var) for var in model.trainable_variables]
+
+                    def generate_binary_mask_and_prune_weight(model, pruning_weight_threshold):
+                        binary_masks = []  # Initialize list to hold binary masks
+                        
+                        # Iterate over each variable to apply the pruning threshold and generate masks
+                        for var in model.trainable_variables:
+                            # Generate a binary mask where weights above the PRUNING_WEIGHT_THRESHOLD are marked with 1, others with 0
+                            mask = tf.cast(tf.abs(var) >= pruning_weight_threshold, var.dtype)
+
+                            # Update the mask at position (0, 0) to be 1 using tf.tensor_scatter_nd_update (To Avoid the constant term being pruned)
+                            indices = tf.constant([[0, 0]])  # Specify the indices to update
+                            updates = tf.constant([1], dtype=mask.dtype)  # Specify the value to update
+                            mask = tf.tensor_scatter_nd_update(mask, indices, updates)
+
+                            binary_masks.append(mask)  # Add the generated mask to the list            
+
+                            # Apply mask to modify weights by setting weights below PRUNING_WEIGHT_THRESHOLD to zero
+                            modified_weight = var * mask
+                            var.assign(modified_weight)            
+                        return binary_masks
+
+                    # Prepare a dictionary to track the training history
+                    history = {'loss': [], 'val_loss': []}
+
+                    # Before the training loop starts
+                    if callbacks:
+                        for callback in callbacks:
+                            # Assign the model to the callback
+                            callback.set_model(model)
+
+                            # Manually setting params before calling any methods that might depend on them
+                            callback.params = {
+                                'epochs': epochs,  # Number of epochs
+                                # You can add more parameters here as needed
+                            }
+
+                            # Now call on_train_begin with all properties set
+                            callback.on_train_begin(logs={'loss_threshold': early_stopping_loss_threshold})
+
+                    training_start_time = time.time()
+                    # Execute the training loop
+                    for epoch in range(epochs):
+                        # Notify callbacks that the epoch has started
+                        if callbacks:
+                            epoch_logs = {}
+                            for callback in callbacks:
+                                callback.on_epoch_begin(epoch, logs=epoch_logs)
+
+                        if verbose: 
+                            eopoch_start_time = time.time()
+
+                        # Reset state of metrics at the start of each epoch
+                        train_loss.reset_states()
+                        val_loss.reset_states()
+
+                        # Retrieve the current pruning schedule threshold
+                        current_pruning_threshold = pruning_schedule[epoch]
+                        binary_mask = generate_binary_mask_and_prune_weight(model, current_pruning_threshold)
+                        
+                        layer_losses_sum = None
+                        layer_indices = [i for i, layer in enumerate(model.layers) if layer.trainable]
+                        # Process each batch in the training dataset
+                        for train_inputs, train_targets in train_dataset:           
+                            loss = train_step(model = model, 
+                                            optimizer = optimizer, 
+                                            loss_fn = loss_fn,
+                                            inputs = train_inputs, 
+                                            targets = train_targets, 
+                                            binary_mask = binary_mask)    
+                            # Record the loss
+                            train_loss(loss)
+
+                        # Process each batch in the validation dataset
+                        for val_inputs, val_targets in val_dataset:
+                            v_loss = val_step(model = model, 
+                                                loss_fn = loss_fn,
+                                                inputs = val_inputs, 
+                                                targets = val_targets)
+                            val_loss(v_loss)
+
+                        # Append the average losses for this epoch to the history
+                        history['loss'].append(train_loss.result().numpy())
+                        history['val_loss'].append(val_loss.result().numpy())
+                        #calculate the average of val_loss
+                        
+                        # Current Losses
+                        current_train_loss = train_loss.result().numpy()
+                        current_val_loss = val_loss.result().numpy()
+
+                        # Notify callbacks that the epoch has ended
+                        epoch_logs = {'loss': current_train_loss, 'val_loss': current_val_loss}
+                        if callbacks:
+                            for callback in callbacks:
+                                callback.on_epoch_end(epoch, logs=epoch_logs)
+                    
+                        if verbose:
+                            epoch_time = time.time() - eopoch_start_time
+                            total_layers = len(model.layers)
+                            trainable_layer_count = sum(1 for layer in model.layers if layer.trainable)
+                            print(f"Epoch {epoch + 1:3.0f}:"
+                                f"  Train Loss: {current_train_loss:9.4e}"
+                                f",  Validation Loss: {current_val_loss:9.4e}"
+                                # f",  Trainable Layers ({trainable_layer_count}/{total_layers})"
+                                f",  Epoch Time: {epoch_time:.2f}s"  
+                                f",  Current Pruning Threshold: {current_pruning_threshold:.5g}")    
+                            
+                        if model.stop_training: # Stop training if all the layers are untrianable
+                            break   
+
+                        # Check for early stopping
+                        if current_train_loss < early_stopping_loss_threshold and current_pruning_threshold > early_stopping_pruning_threshold:
+                            print(f"Early stopping at epoch {epoch+1} as train loss {current_val_loss:.4f} is below the threshold {early_stopping_loss_threshold:.4f}")
+                            break
+
+
+                    # After the training loop ends
+                    training_time = time.time() - training_start_time
+                    print(f'Traininng Stopped. Time elapsed: {training_time:.2f}s')
+                    if callbacks:
+                        for callback in callbacks:
+                            callback.on_train_end(logs={'final_loss': current_train_loss, 'final_val_loss': current_val_loss})
+                    
+
+                    # Return the history containing training and validation losses
+                    return history
+
+                # %% [markdown]
+                # ## **III.Training the Model**
+                # 
+                # The model is trained using the provided training data, batch size, validation split, number of epochs, callbacks, and optimizer. The training progress is monitored, but verbose output is suppressed to keep the output clean.
+
+                # %% [markdown]
+                # #### **Custom Tensorflow Training Loop**
+                # 
+                # Using the tensorflow steps. This function also includes callback functions
+
+                # %%
+                PRUNING_WEIGHT_THRESHOLD = pruning_thresholds[noise_level] # Set the pruning weight threshold based on the noise level
+                N_PERIODS = 4
+                PRUNING_EPOCHS_PER_PERIOD = pruning_epcohs[noise_level]
+                NUM_EPOCHS = PRUNING_EPOCHS_PER_PERIOD * N_PERIODS
+
+                import pruning_schedule as ps
+
+                # Define the pruning schedule
+                pruning_schedule = ps.pruning_schedule_ramp(maximum_threshold=PRUNING_WEIGHT_THRESHOLD, 
+                                                                    steps_per_period=PRUNING_EPOCHS_PER_PERIOD, 
+                                                                    num_periods=N_PERIODS, 
+                                                                    zero_percentage=0.15,
+                                                                    show_plot=False)
+
+                # %%
+                #Setup
+                callbacks = []
+
+                EARLY_STOPPING_LOSS_THRESHOLD =  loss_thresholds[noise_level] # Set the early stopping loss threshold based on the noise level
+                EARLY_STOPPING_PRUNING_THRESHOLD = early_stopping_pruning_thresholds[noise_level] # Set the early stopping pruning threshold based on the noise level
+
+                training_histories = []
+                weights_list = []
+                print(f"Data Size: {training_output.shape}")
+
+                # %%
+                print(f"Total Dimensions: {training_output.shape[1]}")
+                for i in range(0, training_output.shape[1]):
+                    print(f"Training dimension {i + 1}...")
+                    reinitialize_model_weights(model)
+                    output = training_output[:, i:i+1]
+
+                    history = CombOPNet_fit_w_pruning(
+                        model,                   # Model to train
+                        training_input,             # Input data for training
+                        output,                     # Output data for training
+                        batch_size=MINI_BATCH_SIZE, # Number of samples per gradient update
+                        validation_split=0.20,      # Fraction of the training data to be used as validation data
+                        epochs=round(NUM_EPOCHS),   # Number of times the entire training dataset is passed through the model
+                        optimizer=my_optimizer,     # Optimizer to use for training
+                        pruning_schedule = pruning_schedule, # Pruning schedule for gradually increasing the sparsity level
+                        loss_fn=loss_fn,            # Loss function to use for training
+                        data_type=MY_DATA_TYPE,     # Data type to use for training
+                        callbacks= callbacks,       # List of callbacks to apply during training
+                        early_stopping_loss_threshold=EARLY_STOPPING_LOSS_THRESHOLD,# Threshold for early stopping (Layer Based)
+                        early_stopping_pruning_threshold=EARLY_STOPPING_PRUNING_THRESHOLD, # Threshold for early stopping (Pruning Based)
+                        verbose=1,                   # Hide the epoch steps
+                    )
+                    training_histories.append(history)
+
+                    # Retrieve the weights of the trained model
+                    weights_list.append([model.get_layer('CombOpNet').get_weights()])
+                    #reset the weights
+
+
+
+                # %%
+                def generate_set_labels(N):
+                    return ['Constant'] + [f'x{i}' for i in range(1, N+1)]
+
+                # %% [markdown]
+                # #### `coefficient_reconstruction`
+                # 1. **Input Structure Handling**: The function takes `combopnet_weights`, a nested list that represents the weights of a segmented or parallel neural network (combopnet). This list is structured to encapsulate multiple combopnets, each containing multiple layers, where each layer consists of neurons connected to the next layer through weights.
+                # 
+                # 2. **Unique Prime Number Assignment**:
+                #     - Each neuron in the network is assigned a unique prime number, not based on its layer or combopnet index but purely on its neuron index across the entire network. This assignment is crucial for generating unique keys in the output dictionary, representing different paths through the network.
+                # 
+                # 3. **Path Exploration and Weight Product Calculation**:
+                #     - The function recursively explores all possible paths from the input layer to the output layer across each combopnet.
+                #     - For each path, it calculates two products:
+                #         a. **Prime Product**: The product of the unique prime numbers assigned to each neuron along the path.
+                #         b. **Weight Product**: The product of the weights of connections along the path.
+                # 
+                # 4. **Global Flags and Thresholds**:
+                #     - **ENABLE_MINIMUM_WEIGHT_FILTER**: A flag that, when enabled, allows the function to ignore any path containing a weight below a specified threshold (`MINIMUM_WEIGHT_THRESHOLD`).
+                #     - **MINIMUM_WEIGHT_THRESHOLD**: The minimum weight threshold used to filter paths when `ENABLE_MINIMUM_WEIGHT_FILTER` is enabled.
+                #     - **ENABLE_COEFFICIENT_SORTING**: A flag that, when enabled, sorts the final products within each combopnet based on the absolute value of the weight product, in descending order.
+                # 
+                # 5. **Output Format**:
+                #     - The function outputs a list of dictionaries, one for each combopnet. Each dictionary represents the possible paths through the network:
+                #         - **Keys**: The product of prime numbers representing each neuron along the path. This serves as a unique identifier for the path through the network.
+                #         - **Values**: The product of the weights along the corresponding path.
+                # 
+                # 6. **Recursive Exploration**:
+                #     - A recursive helper function (`explore_path`) is used to traverse the network. This function updates the current product of weights and prime numbers as it progresses from the input layer to the output layer, accumulating results in a list.
+                # 
+                # 7. **Adjustments for Real-World Use Cases**:
+                #     - The function includes placeholders for additional features that might be relevant for certain applications, such as thresholding based on weight magnitudes and sorting the paths based on their significance (as measured by the product of weights).
+
+                # %%
+                def coefficient_reconstruction(dim_index,
+                                            num_activation_fns,
+                                                weights, 
+                                                minimum_coefficient_threshold = 1e-5,
+                                                coefficient_output_digits = 10, 
+                                                enable_coefficient_sorting = False):
+                    
+                    max_neurons = int((max(max(len(layer) for layer in combopnet) for combopnet in weights) - 1)/num_activation_fns)
+                    
+                    labels = generate_set_labels(max_neurons) # number of states = number of neurons - 1
+
+                    def explore_path(combopnet_index, layer, neuron, weight_product, label_counts, non_zero_paths):
+                        """
+                        Recursively explores non-zero paths in a neural network.
+                        """
+                        if layer == len(weights[combopnet_index]) - 1:
+                            non_zero_paths.append((label_counts, weight_product))
+                            return
+
+                        for next_neuron, weight in enumerate(weights[combopnet_index][layer][neuron]):
+                            if abs(weight) <= 1e-15:
+                                # Skip recursion if the weight is zero (if one weight is zero, the whole path will be eliminated)
+                                continue  
+                            new_weight_product = weight_product * weight
+                            next_label_counts = label_counts.copy()
+                            next_label_counts[labels[next_neuron]] = next_label_counts.get(labels[next_neuron], 0) + 1
+                            explore_path(combopnet_index, layer + 1, next_neuron, new_weight_product, next_label_counts, non_zero_paths)
+                    
+                    #beginning of the algorithm
+                    all_combopnet_products = []
+                    for combopnet_index, _ in enumerate(weights):
+                        non_zero_paths = []
+                        #collect all non-zero paths
+                        for neuron_index in range(len(weights[combopnet_index][0])):
+                            label_counts = {labels[neuron_index]: 1}
+                            explore_path(combopnet_index, 0, neuron_index, 1, label_counts, non_zero_paths)
+                        
+                        #sum up the products with identical composite nonlinear/linear terms
+                        combopnet_products = {}
+                        for label_counts, weight_product in non_zero_paths:
+                            label_counts_key = frozenset(label_counts.items())
+                            if label_counts_key in combopnet_products:
+                                combopnet_products[label_counts_key] += weight_product
+                            else:
+                                combopnet_products[label_counts_key] = weight_product
+                        
+                        #remove the negligible composite terms
+                        combopnet_products = {k: v for k, v in combopnet_products.items() if abs(v) >= minimum_coefficient_threshold}
+                        
+                        if enable_coefficient_sorting:
+                            #sort the composite terms by their absolute values
+                            sorted_combopnet_products = dict(sorted(combopnet_products.items(), key=lambda item: abs(item[1]), reverse=True))
+                        else:
+                            sorted_combopnet_products = combopnet_products
+
+                        all_combopnet_products.append(sorted_combopnet_products)
+
+                    #output formatting
+                    labeled_all_combopnet_products = []
+                    for combopnet_index, sorted_combopnet_products in enumerate(all_combopnet_products):
+                        combopnet_product_strings = []
+                        for key, value in sorted_combopnet_products.items():
+                            labels_list = []
+                            only_constant = len(key) == 1 and any(label == 'Constant' for label, _ in key)
+                            
+                            for label, count in sorted(key):
+                                if label == 'Constant' and len(key) > 1:
+                                    continue
+                                if label != 'Constant' and count > 1:
+                                    labels_list.append(f"{label}^{count}")
+                                elif label == 'Constant' or count == 1:
+                                    labels_list.append(label if label != 'Constant' else '')
+                            
+                            label_str = '*'.join(filter(None, labels_list))
+                                        
+                            # Apply coefficient threshold if enabled
+                            formatted_value = f"{abs(value):.{coefficient_output_digits}g}"
+
+                            term_str = label_str if formatted_value == '1' else f"{formatted_value}*{label_str}" if not only_constant else formatted_value if formatted_value != '1' else ''
+                            sign = '+' if value >= 0 else '-'
+                            if combopnet_product_strings or value < 0:
+                                term_str = f" {sign} {term_str}"
+                            else:
+                                term_str = term_str
+                            combopnet_product_strings.append(term_str)
+
+                        formatted_output = ''.join(combopnet_product_strings)
+                        layer_prefix = f"(x{combopnet_index+dim_index+1})'= "
+                        full_output = layer_prefix + formatted_output
+                        labeled_all_combopnet_products.append(full_output)
+
+                    return labeled_all_combopnet_products
+
+
+                import os
+                import re
+
+                output_base_path = 'output'
+
+                folder_name = f"noise_{noise_percentage}_level_{noise_level}_missing_{missing_percentage}"
+                folder_path = os.path.join(output_base_path, folder_name)
+                os.makedirs(folder_path, exist_ok=True)
+
+                # Base filename and file extension for the text file
+                base_filename = 'output'
+                file_extension = '.txt'
+
+                # Regex pattern to match existing files with the base name and an optional index
+                pattern = re.compile(rf"{base_filename}(_(\d+))?{file_extension}")
+
+                # Initialize the highest index
+                max_index = -1
+
+                # Search for the highest index
+                for filename in os.listdir(folder_path):
+                    match = pattern.match(filename)
+                    if match:
+                        # Extract the index from the filename, if present
+                        index = int(match.group(2)) if match.group(2) else 0
+                        max_index = max(max_index, index)
+
+                # Increment the highest index found
+                new_index = max_index + 1
+                if new_index == 0:
+                    # If no indexed files were found, use the base filename
+                    file_path = os.path.join(folder_path, f"{base_filename}_1{file_extension}")
+                else:
+                    # If indexed files were found, append the new index to the filename
+                    file_path = os.path.join(folder_path, f"{base_filename}_{new_index}{file_extension}")
+                    
+
+                # %%
+                with open(file_path, "w") as text_file:
+                    for i in range(len(weights_list)):
+                        path_products = coefficient_reconstruction(i,len(activation_fns),
+                                                                weights_list[i], 
+                                                                minimum_coefficient_threshold=3e-1,
+                                                                coefficient_output_digits=10, 
+                                                                enable_coefficient_sorting=False)
+                        
+                        for index, dimension in enumerate(path_products):
+                            text_file.write(f"{dimension}")
+                            text_file.write("\n")
+                # Write the captured output to the dynamically named text file
+
+
+

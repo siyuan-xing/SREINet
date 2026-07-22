@@ -53,7 +53,7 @@ def _draw_graph(
         pos,
         labels=labels,
         ax=ax,
-        font_size=8,
+        font_size=10,
         font_color="0.25",
         font_family="Helvetica",
     )

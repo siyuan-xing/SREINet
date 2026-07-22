@@ -265,9 +265,9 @@ class SREINetTrainer:
             # Loss-based early stopping check
             if (current_train_loss < early_stopping_loss_threshold and 
                 current_pruning_threshold >= early_stopping_pruning_threshold):
-                #save the best weights
-                self.best_weights = [var.copy() for var in self.model.get_weights()]
-                self.best_loss = current_train_loss
+                if self.best_weights is None:
+                    self.best_weights = [var.copy() for var in self.model.get_weights()]
+                    self.best_loss = current_loss_for_best
                 print(f"Early stopping at epoch {epoch+1} as train loss "
                       f"{current_train_loss:.14f} is below the threshold "
                       f"{early_stopping_loss_threshold:.14f}")

@@ -11,7 +11,24 @@ from pathlib import Path
 
 import matplotlib.pyplot as plt
 
-EXAMPLES_DIR = Path(__file__).resolve().parents[1]
+FS_SMALL = 10
+FS_MEDIUM = 12
+FS_LARGE = 14
+
+plt.rcParams.update(
+    {
+        "font.family": "Helvetica",
+        "font.size": FS_SMALL,
+        "axes.labelsize": FS_MEDIUM,
+        "axes.titlesize": FS_MEDIUM,
+        "axes.titleweight": "bold",
+        "xtick.labelsize": FS_SMALL,
+        "ytick.labelsize": FS_SMALL,
+        "legend.fontsize": FS_SMALL,
+    }
+)
+
+EXAMPLES_DIR = Path(__file__).resolve().parents[2]
 if str(EXAMPLES_DIR) not in sys.path:
     sys.path.append(str(EXAMPLES_DIR))
 
@@ -32,7 +49,7 @@ def create_figure(
     hindmarsh_edge_probability: float = 0.2,
     hindmarsh_seed: int = 42,
     kuramoto_nodes: int = 15,
-    figsize: tuple[float, float] = (8.0, 3.0),
+    figsize: tuple[float, float] = (7.0, 2.15),
 ) -> tuple[plt.Figure, list[plt.Axes]]:
     """
     Build a side-by-side figure (each subplot 4x3 inches) for the manuscript.
@@ -60,7 +77,7 @@ def main() -> None:
         default=Path(__file__).resolve().parent / "network_panel.png",
         help="Where to save the figure (default: network_panel.png next to this script).",
     )
-    parser.add_argument("--dpi", type=int, default=300, help="Output resolution.")
+    parser.add_argument("--dpi", type=int, default=600, help="Output resolution.")
     parser.add_argument("--hindmarsh-nodes", type=int, default=25, help="Number of Hindmarsh–Rose nodes.")
     parser.add_argument("--hindmarsh-edge-prob", type=float, default=0.2, help="Edge probability for ER graph.")
     parser.add_argument("--hindmarsh-seed", type=int, default=42, help="Seed controlling the ER graph.")
@@ -72,7 +89,7 @@ def main() -> None:
         hindmarsh_edge_probability=args.hindmarsh_edge_prob,
         hindmarsh_seed=args.hindmarsh_seed,
         kuramoto_nodes=args.kuramoto_nodes,
-        figsize=(6.5, 2.0),
+        figsize=(7.0, 2.15),
     )
     output_path = args.output
     output_path.parent.mkdir(parents=True, exist_ok=True)

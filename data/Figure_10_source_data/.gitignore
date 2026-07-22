@@ -1,0 +1,5 @@
+__pycache__/
+*.mat
+/noise_plot.png
+/MSE_vs _dimensions/Dimensions_versus_mse.png
+/phase_space_original/output/continuous_gaussian_varying_nl_state_space.png
