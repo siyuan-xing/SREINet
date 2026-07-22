@@ -24,6 +24,11 @@ SREINet is a neuro-symbolic framework designed to recover explicit governing equ
 
 ![Figure 1](figs/Figure_1.png)
 
+The SREINet computations reported in this study were performed on a personal
+laptop. Based on the observed scaling behavior, GPU acceleration may enable
+applications to systems with thousands of dimensions, although this regime has
+not yet been experimentally validated.
+
 ### Figure 2: MLP and SREINet architectures
 
 ![Figure 2](figs/Figure_2.png)
