@@ -3,6 +3,10 @@
 This directory contains the timing data and current manuscript image for the
 FPU data-scalability comparison among MANDy, SREINet, EQL, and SymbolNet.
 
+The EQL and SymbolNet entries are aggregate timing results included solely to
+reproduce the published comparison. Their implementations, packages, training
+code, and environments are not distributed or supported by this repository.
+
 The original aggregation-and-plotting script is copied without modification into
 a replica of its expected directory layout.  Run:
 

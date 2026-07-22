@@ -20,11 +20,11 @@ SREINet (Sparse Regression Embedded Interpretable Network) is an interpretable a
 
 SREINet is a neuro-symbolic framework designed to recover explicit governing equations of nonlinear dynamical systems. By replacing standard activation functions with a set of atomic basis functions and eliminating recursive composition, the network's forward pass essentially performs symbolic construction. It assembles multivariate library functions through a structured sequence of additions and multiplications, allowing the output to directly represent the system’s vector field. When combined with a specialized S-shaped periodic pruning strategy, SREINet can achieve exact recovery of the underlying governing equations.
 
-### Figure 1: Schematic illustration of the structure of SREINet and the process of using it to discover governing equations.
+### Figure 1: Comparison of equation-discovery methods
 
-![Figure 1](figs/Figure_11.png)
+![Figure 1](figs/Figure_1.png)
 
-### Figure 2: Performance Comparison
+### Figure 2: MLP and SREINet architectures
 
 ![Figure 2](figs/Figure_2.png)
 
@@ -97,7 +97,7 @@ python download_data.py
 
 ### Running Examples
 
-All experiments are provided as Jupyter notebooks in the `code` directory (e.g. `code\examples` and `code\empirical_data`).
+All experiments are provided as Jupyter notebooks in the `code` directory (e.g. `code/examples` and `code/empirical_data`).
 
 1. **Examples**:
    - `SREINet_Lorenz96.ipynb` - Lorenz 96 system (100D)
@@ -136,28 +136,20 @@ SREINet/
 │   │   └── hindmarsh_rose_network/
 │   ├── empirical_data/                    # Experimental data + notebooks
 │   │   ├── download_data.py
-│   │   ├── TriplePendulum_Data/
-│   │   ├── DoublePendulum_Data/
 │   │   └── SREINet_triple_pendulum_*.ipynb
+│   ├── noise/                             # Noise-study notebooks and source code
 │   ├── ablation/                         # Ablation studies
 │   ├── missing_library_functions/        # Missing-library experiments
-│   ├── SREINet-extension (nonseparable fns) # Nonseparable extensions
-│   └── Archived/                          # Archived experiments
-├── results/                               # Training results and outputs
-│   ├── AL_128D/
-│   ├── DNLS_100D/
-│   ├── Kuramoto_60D/
-│   ├── Lorenz_96_100D/
-│   ├── Phi4/
-│   ├── Hindmarsh_rose_network-75D/
-│   ├── training_dynamics/
-│   ├── training_outputs/
-│   └── ...
-├── data/                                  # Source data for figures
-├── figs/                                  # Generated figures
+│   └── SREINet_extension (nonseparable fns)/ # Nonseparable extensions
+├── data/                                  # Figure 6-14 source packages
+├── figs/                                  # Final manuscript Figures 1-14
 ├── requirements.txt                       # Python dependencies
 └── README.md                              # This file
 ```
+
+The empirical raw-data directories created by `download_data.py`, generated
+noise-study outputs, and the repository-level `results/` directory are local
+artifacts and are ignored by Git.
 
 ## 📄 License
 
