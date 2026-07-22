@@ -160,26 +160,14 @@ artifacts and are ignored by Git.
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 👥 Authors
+## 👥 Software Authors
 
 - **Siyuan (Simon) Xing**, California Polytechnic State University - San Luis Obispo
 - **Qingyu Han**, California Polytechnic State University - San Luis Obispo
-- **Efstathios G. Charalampidis**, San Diego State University
-- **Ying-Cheng Lai**, Arizona State University
 
-<!---
-## 📚 Citation
+## 📚 Related Publication
 
-If you use this code in your research, please cite:
-
-
-```bibtex
-@article{sreinet2025,
-  title={Data-driven discovery of spatiotemporal dynamical systems with sparse interpretable neural networks},
-  author={Xing, Siyuan and Han, Qingyu and Charalampidis, Efstathios G. and Lai, Ying-Cheng},
-  journal={Arxiv},
-  year={2025},
-  doi={TBD}
-}
-```
--->
+This repository accompanies the paper *Data-driven discovery of high-dimensional
+dynamical systems with sparse interpretable neural networks* by Siyuan (Simon)
+Xing, Qingyu Han, Efstathios G. Charalampidis, and Ying-Cheng Lai. The complete
+citation will be added when the publication details are available.
