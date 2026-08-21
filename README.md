@@ -167,7 +167,24 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📚 Related Publication
 
-This repository accompanies the paper *Data-driven discovery of high-dimensional
-dynamical systems with sparse interpretable neural networks* by Siyuan (Simon)
-Xing, Qingyu Han, Efstathios G. Charalampidis, and Ying-Cheng Lai. The complete
-citation will be added when the publication details are available.
+This repository accompanies the following publication:
+
+> Xing, S., Han, Q., Charalampidis, E. G., & Lai, Y.-C. (2026).
+> [Data-driven discovery of high-dimensional dynamical systems with sparse
+> interpretable neural networks](https://doi.org/10.1103/pdkf-98zb).
+> *PRX Intelligence*. American Physical Society.
+
+If you use SREINet in your research, please cite the article:
+
+```bibtex
+@article{pdkf-98zb,
+  title = {Data-driven discovery of high-dimensional dynamical systems with sparse interpretable neural networks},
+  author = {Xing, Siyuan and Han, Qingyu and Charalampidis, Efstathios G. and Lai, Ying-Cheng},
+  journal = {PRX Intelligence},
+  year = {2026},
+  month = {Aug},
+  publisher = {American Physical Society},
+  doi = {10.1103/pdkf-98zb},
+  url = {https://link.aps.org/doi/10.1103/pdkf-98zb}
+}
+```
