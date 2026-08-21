@@ -3,6 +3,7 @@ message: "If you use SREINet, please cite the associated article below."
 title: "SREINet: Sparse Regression Embedded Interpretable Network"
 abstract: "An interpretable, end-to-end machine-learning framework for discovering governing equations of high-dimensional dynamical systems from data."
 type: software
+version: "1.0.0"
 authors:
   - family-names: Xing
     given-names: Siyuan
@@ -34,3 +35,4 @@ preferred-citation:
       orcid: "https://orcid.org/0000-0002-0723-733X"
   journal: "Physical Review X"
   year: 2026
+  doi: "10.1103/pdkf-98zb"
