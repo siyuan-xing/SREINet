@@ -1,9 +1,11 @@
 cff-version: 1.2.0
-message: "If you use SREINet, please cite the associated article below."
+message: "If you use SREINet, please cite the associated article below and this archived software version."
 title: "SREINet: Sparse Regression Embedded Interpretable Network"
 abstract: "An interpretable, end-to-end machine-learning framework for discovering governing equations of high-dimensional dynamical systems from data."
 type: software
 version: "1.0.0"
+date-released: "2026-08-21"
+doi: "10.5281/zenodo.22048994"
 authors:
   - family-names: Xing
     given-names: Siyuan

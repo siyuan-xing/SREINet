@@ -3,6 +3,7 @@
 [![Python 3.10.13](https://img.shields.io/badge/python-3.10.13-blue.svg)](https://www.python.org/downloads/)
 [![TensorFlow 2.10-2.15](https://img.shields.io/badge/tensorflow-2.10--2.15-orange.svg)](https://tensorflow.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22048994.svg)](https://doi.org/10.5281/zenodo.22048994)
 
 ## 📖 Overview
 
@@ -188,3 +189,6 @@ If you use SREINet in your research, please cite the article:
   url = {https://link.aps.org/doi/10.1103/pdkf-98zb}
 }
 ```
+
+The archived `v1.0.0` software release is available on Zenodo at
+[doi:10.5281/zenodo.22048994](https://doi.org/10.5281/zenodo.22048994).
